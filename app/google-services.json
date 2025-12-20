@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "775437782866",
+    "firebase_url": "https://lockin-prototype-default-rtdb.firebaseio.com",
+    "project_id": "lockin-prototype",
+    "storage_bucket": "lockin-prototype.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:775437782866:android:df6f74477ced4b5cd3f48b",
+        "android_client_info": {
+          "package_name": "com.example.lockin_prototype"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFDs1K1dK0iZTDiepCpVUcZOYEyEGkKpM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:775437782866:android:39037043c9df0be1d3f48b",
+        "android_client_info": {
+          "package_name": "com.example.lockinapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFDs1K1dK0iZTDiepCpVUcZOYEyEGkKpM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
