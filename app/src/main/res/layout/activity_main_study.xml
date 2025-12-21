@@ -25,6 +25,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:fontFamily="@font/actor"
+                android:onClick="on_click_log_out"
                 android:text="Log out"
                 android:textSize="14sp" />
 
@@ -60,7 +61,7 @@
             android:textSize="28sp" />
 
         <TextView
-            android:id="@+id/tVMinTimer"
+            android:id="@+id/tvSelectedTime"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -81,7 +82,7 @@
                 android:layout_weight="1" />
 
             <SeekBar
-                android:id="@+id/seekBar"
+                android:id="@+id/seekBarTime"
                 style="@style/Widget.AppCompat.SeekBar.Discrete"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -107,11 +108,12 @@
                 android:layout_weight="1" />
 
             <Button
-                android:id="@+id/button4"
+                android:id="@+id/btnToggleTimer"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:fontFamily="@font/actor"
+                android:onClick="on_click_toggle_timer"
                 android:text="Start!"
                 android:textSize="18sp" />
 
