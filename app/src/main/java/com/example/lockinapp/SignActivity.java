@@ -1,5 +1,6 @@
 package com.example.lockinapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,15 +15,18 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class SignActivity extends AppCompatActivity {
 
-    public EditText eTEmail, eTPassword;
-    public TextView tVSign, tVSignClick;
+    private EditText eTEmail, eTPassword;
+    private TextView tVSign, tVSignClick;
 
-    public FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
+    private FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
+    private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
 
-    public int sign = 0;
+    private int sign = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +54,25 @@ public class SignActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (!task.isSuccessful())
+                        if (task.isSuccessful())
                         {
+                            String userId = mFirebaseAuth.getCurrentUser().getUid(); // UID as userId
+                            User newUser = new User(userId, email.split("@")[0]); // the name is the first part of the email
+
+                            mDatabase.child("Users").child(userId).setValue(newUser)
+                                    .addOnCompleteListener(dbTask -> {
+                                        if (dbTask.isSuccessful()) {
+                                            Toast.makeText(SignActivity.this, "Registered successfully!", Toast.LENGTH_SHORT).show();
+
+                                            // after sign up - go to main study screen
+                                            Intent studyIntent = new Intent(SignActivity.this, MainStudyActivity.class);
+                                            // add userId
+                                            studyIntent.putExtra("USER_ID", userId);
+
+                                            startActivity(studyIntent);
+                                            finish(); // to get back to the screen only use logout
+                                        }
+                                    });
 
                         }
                         else // user creation failed - log and inform user
@@ -61,7 +82,7 @@ public class SignActivity extends AppCompatActivity {
                             else errorMessage = "Unknown Error";
 
                             Log.e("Registration", "Registration Failed: " + errorMessage);
-                            Toast.makeText(SignActivity.this, "Error occurred", Toast.LENGTH_LONG).show();
+                            Toast.makeText(SignActivity.this, "Error occurred - " + errorMessage , Toast.LENGTH_LONG).show();
                         }
                     }
                 });
@@ -69,7 +90,33 @@ public class SignActivity extends AppCompatActivity {
     }
 
     private void signinUser() {
+        String email = eTEmail.getText().toString().trim();
+        String password = eTPassword.getText().toString().trim();
 
+        if (email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        mFirebaseAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(SignActivity.this, "Welcome back!", Toast.LENGTH_SHORT).show();
+
+                        String userId = mFirebaseAuth.getCurrentUser().getUid();
+
+                        // after sign in - go to main study screen
+                        Intent studyIntent = new Intent(SignActivity.this, MainStudyActivity.class);
+                        studyIntent.putExtra("USER_ID", userId); // add userId
+
+                        startActivity(studyIntent);
+                        finish(); // to get back to the screen only use logout
+                    }
+                    else
+                    {
+                        Toast.makeText(SignActivity.this, "Login failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
     }
 
     public void onEnter(View view) {
@@ -77,7 +124,7 @@ public class SignActivity extends AppCompatActivity {
         {
             signinUser();
         }
-        else
+        else // sign up = 1
         {
             registerUser();
         }
@@ -87,14 +134,14 @@ public class SignActivity extends AppCompatActivity {
         if(sign == 0) // sign in = 0
         {
             sign = 1;
-            tVSignClick.setText("To sign up click");
-            tVSign.setText("Sign in:");
+            tVSignClick.setText("To sign in click");
+            tVSign.setText("Sign up:");
         }
         else // signup = 1
         {
             sign = 0;
-            tVSignClick.setText("To sign in click");
-            tVSign.setText("Sign up:");
+            tVSignClick.setText("To sign up click");
+            tVSign.setText("Sign in:");
         }
     }
 }
