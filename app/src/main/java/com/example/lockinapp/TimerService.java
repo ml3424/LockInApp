@@ -14,6 +14,7 @@ import android.hardware.camera2.CameraManager;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.IBinder;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
 
 import androidx.core.app.NotificationCompat;
@@ -56,7 +57,59 @@ public class TimerService extends Service implements SensorEventListener {
     }
 
     @Override
-    public void onSensorChanged(SensorEvent event) {}
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
+
+            // calculate the total acceleration force = a in physics
+            double acceleration = Math.sqrt(x*x + y*y + z*z);
+
+            // if phone is moving significantly
+            if (acceleration > 15) { // 15 is a threshold for significant movement
+                startDistractionAlert();
+            }
+        }
+    }
+
+    private void startDistractionAlert() {
+        if (isDistracted) return; // avoid multiple triggers
+        isDistracted = true;
+
+        // start vibrating
+        if (vibrator != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            {
+                vibrator.vibrate(VibrationEffect.createOneShot(1000, VibrationEffect.DEFAULT_AMPLITUDE));
+            }
+            else
+            {
+                vibrator.vibrate(1000);
+            }
+        }
+
+        // blink the flashlight
+        try
+        {
+            cameraManager.setTorchMode(cameraId, true);
+            // turn off after 500ms
+            new android.os.Handler().postDelayed(() -> {
+                try {
+                    cameraManager.setTorchMode(cameraId, false);
+                    isDistracted = false; // reset for next distraction
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }, 500);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {}
