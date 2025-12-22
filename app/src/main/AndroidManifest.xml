@@ -4,6 +4,10 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -23,6 +27,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".MainStudyActivity"/>
+        <service
+            android:name=".TimerService"
+            android:foregroundServiceType="specialUse"
+            android:exported="false" />
 
         <meta-data
             android:name="preloaded_fonts"
