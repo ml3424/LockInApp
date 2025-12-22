@@ -4,18 +4,62 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.hardware.camera2.CameraManager;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.IBinder;
+import android.os.Vibrator;
 
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-public class TimerService extends Service {
+public class TimerService extends Service implements SensorEventListener {
 
     private static final String CHANNEL_ID = "timer_service_channel";
     private CountDownTimer countDownTimer;
+
+    private SensorManager sensorManager;
+    private Sensor accelerometer;
+    private CameraManager cameraManager;
+    private Vibrator vibrator;
+    private boolean isDistracted = false;
+    private String cameraId;
+
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        // initialize sensors and hardware
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+
+        try
+        {
+            cameraId = cameraManager.getCameraIdList()[0]; // get the main camera flash
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // register the sensor listener
+        if (accelerometer != null) {
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {}
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -85,6 +129,8 @@ public class TimerService extends Service {
 
     @Override
     public void onDestroy() {
+        sensorManager.unregisterListener(this);
+
         if (countDownTimer != null) {
             countDownTimer.cancel();
         }
