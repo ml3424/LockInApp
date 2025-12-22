@@ -20,7 +20,7 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/button3"
+                android:id="@+id/btnLogOut"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -64,7 +64,7 @@
             android:id="@+id/tvSelectedTime"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:fontFamily="@font/aldrich"
             android:gravity="center"
             android:text="0"
@@ -131,7 +131,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:orientation="horizontal">
 
             <Space
@@ -140,7 +140,7 @@
                 android:layout_weight="1" />
 
             <Spinner
-                android:id="@+id/spinner"
+                android:id="@+id/spinnerSubjects"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="2" />
