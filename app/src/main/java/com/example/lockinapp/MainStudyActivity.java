@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -12,6 +13,7 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -129,7 +131,8 @@ public class MainStudyActivity extends AppCompatActivity implements AdapterView.
         saveSessionToFirebase();
     }
 
-    private void saveSessionToFirebase() {
+    private void saveSessionToFirebase()
+    {
         DatabaseReference sessionsRef = FirebaseDatabase.getInstance().getReference("StudySessions");
 
         // generate a unique ID for this session
@@ -141,18 +144,17 @@ public class MainStudyActivity extends AppCompatActivity implements AdapterView.
         String currentTime = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
                 java.util.Locale.getDefault()).format(new java.util.Date());
 
-        // 4. create the session object
+        // create the session object
         StudySession session = new StudySession(
                 sessionId,
                 currentUserId,
                 selectedSubject,
                 currentTime,
                 durationSeconds,
-                85, // aiConcentrationScore - placeholder for now
+                85, // aiConcentrationScore - for now
                 points
         );
 
-        // 5. save to Firebase
         if (sessionId != null) {
             sessionsRef.child(sessionId).setValue(session)
                     .addOnSuccessListener(aVoid -> {
