@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_stats"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:title="Stats" />
+
+    <item
+        android:id="@+id/nav_study"
+        android:icon="@android:drawable/ic_media_play"
+        android:title="Study" />
+
+    <item
+        android:id="@+id/nav_store"
+        android:icon="@android:drawable/ic_menu_view"
+        android:title="Store" />
+</menu>
