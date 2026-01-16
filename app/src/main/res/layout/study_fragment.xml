@@ -25,7 +25,6 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:fontFamily="@font/actor"
-                android:onClick="on_click_log_out"
                 android:text="Log out"
                 android:textSize="14sp" />
 
@@ -113,7 +112,6 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:fontFamily="@font/actor"
-                android:onClick="on_click_toggle_timer"
                 android:text="Start!"
                 android:textSize="18sp" />
 

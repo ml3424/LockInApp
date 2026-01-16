@@ -32,7 +32,7 @@ public class MainStudyActivity extends AppCompatActivity {
             if (id == R.id.nav_stats) {
                 // selectedFragment = new StatsFragment();
             } else if (id == R.id.nav_study) {
-                // selectedFragment = new StudyFragment();
+                selectedFragment = new StudyFragment();
             } else if (id == R.id.nav_store) {
                 // selectedFragment = new StoreFragment();
             }

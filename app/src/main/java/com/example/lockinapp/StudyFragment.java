@@ -1,0 +1,249 @@
+package com.example.lockinapp;
+
+import static android.content.Context.MODE_PRIVATE;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.SeekBar;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+public class StudyFragment extends Fragment implements AdapterView.OnItemSelectedListener{
+
+    private SeekBar seekBarTime;
+    private TextView tvSelectedTime;
+    private Button btnToggleTimer, btnLogOut;
+    private Spinner spinnerSubjects;
+
+    private String currentUserId;
+    private boolean isTimerRunning = false;
+    private int selectedMinutes = 0;
+    private String selectedSubject = "";
+
+    public StudyFragment() {
+        // required empty public constructor
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        // first inflate the layout
+        View view = inflater.inflate(R.layout.study_fragment, container, false);
+
+        // find views within the inflated view object
+        seekBarTime = view.findViewById(R.id.seekBarTime);
+        tvSelectedTime = view.findViewById(R.id.tvSelectedTime);
+        btnToggleTimer = view.findViewById(R.id.btnToggleTimer);
+        btnLogOut = view.findViewById(R.id.btnLogOut);
+        spinnerSubjects = view.findViewById(R.id.spinnerSubjects);
+
+        currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        String[] subjects = {"Math", "English", "History", "Computer Science", "Physics"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_dropdown_item, subjects);
+        spinnerSubjects.setAdapter(adapter);
+        spinnerSubjects.setOnItemSelectedListener(this);
+
+        // setup seekbar listener
+        seekBarTime.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                // updates the text as the user slides the bar
+                selectedMinutes = progress;
+                tvSelectedTime.setText("" + selectedMinutes + " minutes");
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+        // set click listeners for the buttons
+        btnToggleTimer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                on_click_toggle_timer(v);
+            }
+        });
+
+        btnLogOut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                on_click_log_out();
+            }
+        });
+
+        // inflate the layout for this fragment
+        return view;
+    }
+
+    // receiver to catch updates from the service and show countdown on screen
+    private BroadcastReceiver timerReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals("TIMER_UPDATE")) {
+                String timeLeft = intent.getStringExtra("TIME_LEFT");
+                tvSelectedTime.setText(timeLeft); // update the minutes on screen
+            }
+            else if (intent.getAction().equals("TIMER_FINISHED")) {
+                handleStudySessionEnd(); // custom end logic
+            }
+        }
+    };
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        selectedSubject = parent.getItemAtPosition(position).toString();
+    }
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {}
+
+    private void startTimer() {
+        if (selectedMinutes > 0)
+        {
+            btnLogOut.setEnabled(false);
+
+            // start timer service
+            Intent serviceIntent = new Intent(requireContext(), TimerService.class);
+            serviceIntent.putExtra("DURATION_MIN", selectedMinutes);
+            requireActivity().startService(serviceIntent);
+
+            // able stoping the timer
+            isTimerRunning = true;
+            btnToggleTimer.setText("Stop Timer");
+            seekBarTime.setEnabled(false); // lock seekbar
+        }
+    }
+
+    private void stopTimer() {
+        // stop timer service
+        Intent serviceIntent = new Intent(requireContext(), TimerService.class);
+        requireContext().stopService(serviceIntent);
+
+        resetUITimer();
+    }
+
+    private void handleStudySessionEnd()
+    {
+        isTimerRunning = false;
+        btnToggleTimer.setVisibility(View.GONE); // remove STOP TIMER button as requested
+        tvSelectedTime.setText("Done!");
+        resetUITimer();
+
+        // save to Firebase
+        saveSessionToFirebase();
+    }
+
+    private void saveSessionToFirebase()
+    {
+        DatabaseReference sessionsRef = FirebaseDatabase.getInstance().getReference("StudySessions");
+
+        // generate a unique ID for this session
+        String sessionId = sessionsRef.push().getKey();
+
+        // calculate data
+        long durationSeconds = selectedMinutes * 60;
+        int points = (int) (selectedMinutes * 10); // 10 points per minute
+        String currentTime = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
+                java.util.Locale.getDefault()).format(new java.util.Date());
+
+        // create the session object
+        StudySession session = new StudySession(
+                sessionId,
+                currentUserId,
+                selectedSubject,
+                currentTime,
+                durationSeconds,
+                85, // aiConcentrationScore - for now
+                points
+        );
+
+        if (sessionId != null) {
+            sessionsRef.child(sessionId).setValue(session)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(requireContext(), "Session saved! You earned " + points + " points", Toast.LENGTH_LONG).show();
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("firebase", "failed to save session", e);
+                    });
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("TIMER_UPDATE");
+        filter.addAction("TIMER_FINISHED");
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(timerReceiver, filter);
+    }
+
+    @Override
+    public void onPause() {
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(timerReceiver);
+        super.onPause();
+    }
+
+    private void resetUITimer() {
+        isTimerRunning = false;
+        btnToggleTimer.setText("Start!");
+        btnToggleTimer.setVisibility(View.VISIBLE);
+        btnLogOut.setEnabled(true);
+
+        seekBarTime.setEnabled(true); // unlock seekbar
+        tvSelectedTime.setText("0");
+    }
+
+    private void on_click_log_out() {
+        // update shared preferences to stop auto-login
+        SharedPreferences sP = requireActivity().getSharedPreferences("stay_logged_in", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sP.edit();
+        editor.putBoolean("stayConnected", false);
+        editor.apply();
+
+        // sign out from firebase auth
+        FirebaseAuth.getInstance().signOut();
+
+        // back to sign activity
+        Intent intent = new Intent(requireContext(), SignActivity.class);
+        startActivity(intent);
+        requireActivity().finish();
+    }
+
+    public void on_click_toggle_timer(View view) {
+        if (!isTimerRunning)
+        {
+            startTimer();
+        }
+        else
+        {
+            stopTimer();
+        }
+    }
+
+}
+
