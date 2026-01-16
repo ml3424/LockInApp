@@ -16,6 +16,7 @@ import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -68,6 +69,7 @@ public class TimerService extends Service implements SensorEventListener {
 
             // if phone is moving significantly
             if (acceleration > 15) { // 15 is a threshold for significant movement
+                Log.d("Distraction", "Acceleration detected: " + acceleration);
                 startDistractionAlert();
             }
         }
