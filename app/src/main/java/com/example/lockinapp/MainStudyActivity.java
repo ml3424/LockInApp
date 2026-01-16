@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -22,6 +23,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -190,6 +192,15 @@ public class MainStudyActivity extends AppCompatActivity implements AdapterView.
     }
 
     public void on_click_log_out(View view) {
+        // update shared preferences to stop auto-login
+        SharedPreferences sP = getSharedPreferences("stay_logged_in", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sP.edit();
+        editor.putBoolean("stayConnected", false);
+        editor.apply();
+
+        // sign out from firebase auth
+        FirebaseAuth.getInstance().signOut();
+        
         // back to sign activity
         Intent intent = new Intent(MainStudyActivity.this, SignActivity.class);
         startActivity(intent);

@@ -147,7 +147,7 @@
                 android:inputType="textPassword" />
 
             <CheckBox
-                android:id="@+id/checkBox"
+                android:id="@+id/cBRemember"
                 android:layout_width="match_parent"
                 android:layout_height="0sp"
                 android:layout_weight="2"
