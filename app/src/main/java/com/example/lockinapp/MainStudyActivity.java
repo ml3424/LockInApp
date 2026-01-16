@@ -172,6 +172,8 @@ public class MainStudyActivity extends AppCompatActivity implements AdapterView.
         isTimerRunning = false;
         btnToggleTimer.setText("START TIMER");
         btnToggleTimer.setVisibility(View.VISIBLE);
+        btnLogOut.setEnabled(true);
+
         seekBarTime.setEnabled(true); // unlock seekbar
         tvSelectedTime.setText("0");
     }
