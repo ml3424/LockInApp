@@ -30,11 +30,11 @@ public class MainStudyActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             if (id == R.id.nav_stats) {
-                // selectedFragment = new StatsFragment();
+                selectedFragment = new StatsFragment();
             } else if (id == R.id.nav_study) {
                 selectedFragment = new StudyFragment();
             } else if (id == R.id.nav_store) {
-                // selectedFragment = new StoreFragment();
+                selectedFragment = new StoreFragment();
             }
 
             if (selectedFragment != null) {
