@@ -2,11 +2,13 @@ package com.example.lockinapp;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,6 +22,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.camera.view.PreviewView;
+import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,6 +42,9 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
     private TextView tvSelectedTime;
     private Button btnToggleTimer, btnLogOut;
     private Spinner spinnerSubjects;
+    private PreviewView cameraPreview; // XML view needed for camera
+
+    private StudyCameraManager cameraManager;
 
     private String currentUserId;
     private boolean isTimerRunning = false;
@@ -58,8 +67,14 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         btnToggleTimer = view.findViewById(R.id.btnToggleTimer);
         btnLogOut = view.findViewById(R.id.btnLogOut);
         spinnerSubjects = view.findViewById(R.id.spinnerSubjects);
+        cameraPreview = view.findViewById(R.id.cameraPreview);
 
         currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        cameraManager = new StudyCameraManager(requireContext(), getViewLifecycleOwner(), cameraPreview);
+
+        // Check permissions immediately
+        checkCameraPermissions();
 
         String[] subjects = {"Math", "English", "History", "Computer Science", "Physics"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
@@ -100,6 +115,26 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         // inflate the layout for this fragment
         return view;
     }
+
+    private void checkCameraPermissions() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissionLauncher.launch(Manifest.permission.CAMERA);
+        }
+        else {
+            cameraManager.startCamera(); // Start camera only if allowed
+        }
+    }
+
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    cameraManager.startCamera();
+                }
+                else {
+                    Toast.makeText(requireContext(), "Camera needed for AI analysis", Toast.LENGTH_SHORT).show();
+                }
+            });
 
     // receiver to catch updates from the service and show countdown on screen
     private BroadcastReceiver timerReceiver = new BroadcastReceiver() {
