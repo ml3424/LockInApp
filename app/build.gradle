@@ -3,6 +3,12 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
 }
 
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localProperties.load(new FileInputStream(localPropertiesFile))
+}
+
 android {
     namespace 'com.example.lockinapp'
     compileSdk {
@@ -16,7 +22,13 @@ android {
         versionCode 1
         versionName "1.0"
 
+        buildConfigField "String", "GEMINI_API", "\"${localProperties.getProperty('GEMINI_API_KEY')}\""
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        buildConfig true // ensure buildconfig generation is enabled
     }
 
     buildTypes {
@@ -25,6 +37,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
@@ -39,8 +52,15 @@ dependencies {
     implementation libs.firebase.auth
     implementation libs.firebase.database
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation libs.generativeai
 
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
+
+    implementation ("com.google.ai.client.generativeai:generativeai:0.9.0")
+    implementation 'com.google.firebase:firebase-storage:20.3.0'
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
+    implementation 'com.firebaseui:firebase-ui-storage:7.2.0'
 }

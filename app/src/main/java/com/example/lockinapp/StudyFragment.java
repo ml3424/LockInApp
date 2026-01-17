@@ -123,6 +123,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
     public void onNothingSelected(AdapterView<?> parent) {}
 
     private void startTimer() {
+        navigateToFeedback("0",0,0);
         if (selectedMinutes > 0)
         {
             btnLogOut.setEnabled(false);
@@ -168,6 +169,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         // calculate data
         long durationSeconds = selectedMinutes * 60;
         int points = (int) (selectedMinutes * 10); // 10 points per minute
+        int aiScore = 85;
         String currentTime = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
                 java.util.Locale.getDefault()).format(new java.util.Date());
 
@@ -178,7 +180,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
                 selectedSubject,
                 currentTime,
                 durationSeconds,
-                85, // aiConcentrationScore - for now
+                aiScore,
                 points
         );
 
@@ -186,12 +188,34 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
             sessionsRef.child(sessionId).setValue(session)
                     .addOnSuccessListener(aVoid -> {
                         Toast.makeText(requireContext(), "Session saved! You earned " + points + " points", Toast.LENGTH_LONG).show();
+                        navigateToFeedback(sessionId, aiScore, selectedMinutes);
                     })
                     .addOnFailureListener(e -> {
                         Log.e("firebase", "failed to save session", e);
                     });
         }
     }
+
+    private void navigateToFeedback(String sessionId, int score, int durationMin) {
+        // create the feedback fragment and bundle
+        SessionFeedbackFragment feedbackFrag = new SessionFeedbackFragment();
+        Bundle args = new Bundle();
+
+        // put session data to pass it over
+        args.putString("SESSION_ID", sessionId);
+        args.putInt("SCORE", score);
+        args.putLong("DURATION_MIN", (long) durationMin);
+        feedbackFrag.setArguments(args);
+
+        // switch fragments using the fragment manager
+        if (isAdded()) { // ensure fragment is still attached to activity
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, feedbackFrag)
+                    .addToBackStack(null) // lets user go back if they want
+                    .commit();
+        }
+    }
+
 
     @Override
     public void onResume() {
