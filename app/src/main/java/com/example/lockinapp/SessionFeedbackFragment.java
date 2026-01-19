@@ -84,7 +84,7 @@ public class SessionFeedbackFragment extends Fragment {
                 "Duration: " + sessionDurationMin + " minutes. " +
                 "AI Concentration Score: " + sessionScore + "/100. " +
                 "User's feeling: '" + userFeedback + "'. " +
-                "Provide a short, warm motivating feedback and one tip for the next session. in Hebrew.";
+                "Provide a short, warm, motivating feedback and one tip for the next session in Hebrew.";
 
         tvAiFeedback.setText("Thinking...");
         btnSendFeedback.setEnabled(false);

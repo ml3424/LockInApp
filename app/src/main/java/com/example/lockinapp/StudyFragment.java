@@ -96,8 +96,8 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         seekBarTime.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                selectedMinutes = progress;
-                tvSelectedTime.setText("" + selectedMinutes + " minutes");
+                selectedMinutes = progress+1;
+                tvSelectedTime.setText("" + selectedMinutes + " min");
             }
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {}

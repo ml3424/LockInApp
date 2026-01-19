@@ -66,7 +66,7 @@
             android:layout_weight="2"
             android:fontFamily="@font/aldrich"
             android:gravity="center"
-            android:text="0"
+            android:text="1 min"
             android:textSize="24sp" />
 
         <LinearLayout
@@ -87,7 +87,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="12"
                 android:max="60"
-                android:progress="3" />
+                android:progress="0" />
 
             <Space
                 android:layout_width="wrap_content"
