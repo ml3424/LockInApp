@@ -76,44 +76,39 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         // Check permissions immediately
         checkCameraPermissions();
 
+        setupSpinner();
+        setupSeekBar();
+        setupButtons();
+
+        // inflate the layout for this fragment
+        return view;
+    }
+
+    private void setupSpinner() {
         String[] subjects = {"Math", "English", "History", "Computer Science", "Physics"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_dropdown_item, subjects);
         spinnerSubjects.setAdapter(adapter);
         spinnerSubjects.setOnItemSelectedListener(this);
+    }
 
-        // setup seekbar listener
+    private void setupSeekBar() {
         seekBarTime.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                // updates the text as the user slides the bar
                 selectedMinutes = progress;
                 tvSelectedTime.setText("" + selectedMinutes + " minutes");
             }
-
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {}
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
+    }
 
-        // set click listeners for the buttons
-        btnToggleTimer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                on_click_toggle_timer(v);
-            }
-        });
-
-        btnLogOut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                on_click_log_out();
-            }
-        });
-
-        // inflate the layout for this fragment
-        return view;
+    private void setupButtons() {
+        btnToggleTimer.setOnClickListener(v -> on_click_toggle_timer(v));
+        btnLogOut.setOnClickListener(v -> on_click_log_out());
     }
 
     private void checkCameraPermissions() {
@@ -158,7 +153,9 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
     public void onNothingSelected(AdapterView<?> parent) {}
 
     private void startTimer() {
-        navigateToFeedback("0",0,0);
+        // Quick debug check
+        // navigateToFeedback("0", 0, 0);
+
         if (selectedMinutes > 0)
         {
             btnLogOut.setEnabled(false);
@@ -172,6 +169,8 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
             isTimerRunning = true;
             btnToggleTimer.setText("Stop Timer");
             seekBarTime.setEnabled(false); // lock seekbar
+
+            cameraManager.startRandomCaptures();
         }
     }
 
@@ -180,6 +179,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         Intent serviceIntent = new Intent(requireContext(), TimerService.class);
         requireContext().stopService(serviceIntent);
 
+        cameraManager.stopRandomCaptures();
         resetUITimer();
     }
 
@@ -187,7 +187,8 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
     {
         isTimerRunning = false;
         btnToggleTimer.setVisibility(View.GONE); // remove STOP TIMER button as requested
-        tvSelectedTime.setText("Done!");
+        
+        cameraManager.stopRandomCaptures();
         resetUITimer();
 
         // save to Firebase
@@ -204,7 +205,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         // calculate data
         long durationSeconds = selectedMinutes * 60;
         int points = (int) (selectedMinutes * 10); // 10 points per minute
-        int aiScore = 85;
+        int aiScore = cameraManager.getAverageScore();
         String currentTime = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
                 java.util.Locale.getDefault()).format(new java.util.Date());
 
