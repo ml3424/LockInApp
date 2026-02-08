@@ -84,11 +84,14 @@ public class SignActivity extends AppCompatActivity {
                             User newUser = new User(userId, email.split("@")[0]); // the name is the first part of the email
 
                             mDatabase.child("Users").child(userId).setValue(newUser)
-                                    .addOnCompleteListener(dbTask -> {
-                                        if (dbTask.isSuccessful()) {
-                                            Toast.makeText(SignActivity.this, "Registered successfully!", Toast.LENGTH_SHORT).show();
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> dbTask) {
+                                            if (dbTask.isSuccessful()) {
+                                                Toast.makeText(SignActivity.this, "Registered successfully!", Toast.LENGTH_SHORT).show();
 
-                                            goToMainActivity(userId);
+                                                goToMainActivity(userId);
+                                            }
                                         }
                                     });
 
@@ -117,18 +120,24 @@ public class SignActivity extends AppCompatActivity {
         }
 
         mFirebaseAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        // save preference based on checkbox
-                        saveLoginPreference();
-                        Toast.makeText(SignActivity.this, "Welcome back!", Toast.LENGTH_SHORT).show();
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // save preference based on checkbox
+                            saveLoginPreference();
 
-                        String userId = mFirebaseAuth.getCurrentUser().getUid();
-                        goToMainActivity(userId);
-                    }
-                    else
-                    {
-                        Toast.makeText(SignActivity.this, "Login failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(SignActivity.this, "Welcome back!", Toast.LENGTH_SHORT).show();
+
+                            // retrieve the unique identifier for the authenticated user
+                            String userId = mFirebaseAuth.getCurrentUser().getUid();
+
+                            goToMainActivity(userId);
+                        } else {
+                            // provide specific feedback from firebase if the authentication fails
+                            Toast.makeText(SignActivity.this, "Login failed: " +
+                                    task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        }
                     }
                 });
     }

@@ -92,23 +92,23 @@ public class TimerService extends Service implements SensorEventListener {
         }
 
         // blink the flashlight
-        try
-        {
+        try {
             cameraManager.setTorchMode(cameraId, true);
-            // turn off after 500ms
-            new android.os.Handler().postDelayed(() -> {
-                try {
-                    cameraManager.setTorchMode(cameraId, false);
-                    isDistracted = false; // reset for next distraction
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
+
+            // use a handler to schedule the "turn off" action after a delay
+            new android.os.Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        cameraManager.setTorchMode(cameraId, false);
+                        isDistracted = false;
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }, 500);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

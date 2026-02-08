@@ -52,19 +52,26 @@ public class SessionFeedbackFragment extends Fragment {
             tvFeedbackScore.setText(String.valueOf(sessionScore));
         }
 
-        // setup send button logic
-        btnSendFeedback.setOnClickListener(v -> generateAiFeedback());
+        btnSendFeedback.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                generateAiFeedback();
+            }
+        });
 
-        // back button logic
-        btnBack.setOnClickListener(v -> {
-            // go back to the previous fragment (StudyFragment)
-            if (getParentFragmentManager().getBackStackEntryCount() > 0) {
-                getParentFragmentManager().popBackStack();
-            } else {
-                // if for some reason backstack is empty, replace manually
-                getParentFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new StudyFragment())
-                        .commit();
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (getParentFragmentManager().getBackStackEntryCount() > 0) {
+                    // remove the current fragment from the stack to return to the previous state
+                    getParentFragmentManager().popBackStack();
+                }
+                else {
+                    // prevent a stuck ui if the backstack is unexpectedly empty
+                    getParentFragmentManager().beginTransaction()
+                            .replace(R.id.fragment_container, new StudyFragment())
+                            .commit();
+                }
             }
         });
 
@@ -92,22 +99,28 @@ public class SessionFeedbackFragment extends Fragment {
         // call gemini manager for text prompt
         geminiManager.sendTextPrompt(prompt, new GeminiCallBack() {
             @Override
-            public void onSuccess(String result) {
+            public void onSuccess(final String result) {
                 if (getActivity() == null) return;
 
-                requireActivity().runOnUiThread(() -> {
-                    tvAiFeedback.setText(result);
-                    btnSendFeedback.setEnabled(true);
+                requireActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        tvAiFeedback.setText(result);
+                        btnSendFeedback.setEnabled(true);
+                    }
                 });
             }
 
             @Override
-            public void onFailure(Throwable error) {
+            public void onFailure(final Throwable error) {
                 if (getActivity() == null) return;
 
-                requireActivity().runOnUiThread(() -> {
-                    tvAiFeedback.setText("Error getting feedback: " + error.getMessage());
-                    btnSendFeedback.setEnabled(true);
+                requireActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        tvAiFeedback.setText("Error getting feedback: " + error.getMessage());
+                        btnSendFeedback.setEnabled(true);
+                    }
                 });
             }
         });

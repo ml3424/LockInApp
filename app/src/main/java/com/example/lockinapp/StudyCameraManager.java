@@ -52,31 +52,46 @@ public class StudyCameraManager {
     }
 
     public void startCamera() {
-        ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(context);
+        // get an instance of the camera provider to bind the camera lifecycle
+        final ListenableFuture<ProcessCameraProvider> cameraProviderFuture =
+                ProcessCameraProvider.getInstance(context);
 
-        cameraProviderFuture.addListener(() -> {
-            try {
-                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
-
-                Preview preview = new Preview.Builder().build();
-                preview.setSurfaceProvider(previewView.getSurfaceProvider());
-
-                imageCapture = new ImageCapture.Builder().build();
-
-                // Select Front Camera
-                CameraSelector cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA;
-
+        // add a listener to wait for the camera provider to be ready
+        cameraProviderFuture.addListener(new Runnable() {
+            @Override
+            public void run() {
                 try {
-                    cameraProvider.unbindAll();
-                    cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageCapture);
-                } catch (Exception exc) {
-                    Log.e("CameraManager", "Use case binding failed", exc);
-                }
+                    // retrieve the camera provider after it is initialized
+                    ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
 
-            } catch (ExecutionException | InterruptedException e) {
-                Log.e("CameraManager", "Camera provider failed", e);
+                    // initialize the preview use case to display the camera feed
+                    Preview preview = new Preview.Builder().build();
+                    // link the preview to the previewView in the layout
+                    preview.setSurfaceProvider(previewView.getSurfaceProvider());
+
+                    // initialize the image capture use case for taking photos
+                    imageCapture = new ImageCapture.Builder().build();
+
+                    // select the front camera as the default
+                    CameraSelector cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA;
+
+                    try {
+                        // unbind any existing use cases before rebinding new ones
+                        cameraProvider.unbindAll();
+                        // bind the camera to the lifecycle of the fragment
+                        cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageCapture);
+                    }
+                    catch (Exception exc) {
+                        // handle errors during use case binding
+                        Log.e("CameraManager", "Use case binding failed", exc);
+                    }
+
+                }
+                catch (ExecutionException | InterruptedException e) {
+                    Log.e("CameraManager", "Camera provider failed", e);
+                }
             }
-        }, ContextCompat.getMainExecutor(context));
+        }, ContextCompat.getMainExecutor(context)); // ensure this runs on the main thread for UI safety
     }
 
     public void startRandomCaptures() {

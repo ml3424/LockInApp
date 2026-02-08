@@ -22,12 +22,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -107,8 +110,19 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
     }
 
     private void setupButtons() {
-        btnToggleTimer.setOnClickListener(v -> on_click_toggle_timer(v));
-        btnLogOut.setOnClickListener(v -> on_click_log_out());
+        btnToggleTimer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                on_click_toggle_timer(v);
+            }
+        });
+
+        btnLogOut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                on_click_log_out();
+            }
+        });
     }
 
     private void checkCameraPermissions() {
@@ -122,14 +136,17 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
     }
 
     private final ActivityResultLauncher<String> requestPermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                if (isGranted) {
-                    cameraManager.startCamera();
-                }
-                else {
-                    Toast.makeText(requireContext(), "Camera needed for AI analysis", Toast.LENGTH_SHORT).show();
-                }
-            });
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(),
+                    new ActivityResultCallback<Boolean>() {
+                        @Override
+                        public void onActivityResult(Boolean isGranted) {
+                            if (isGranted) {
+                                cameraManager.startCamera();
+                            } else {
+                                Toast.makeText(requireContext(), "Camera needed for AI analysis", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
 
     // receiver to catch updates from the service and show countdown on screen
     private BroadcastReceiver timerReceiver = new BroadcastReceiver() {
@@ -153,7 +170,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
     public void onNothingSelected(AdapterView<?> parent) {}
 
     private void startTimer() {
-        // Quick debug check
+        // debug check
         // navigateToFeedback("0", 0, 0);
 
         if (selectedMinutes > 0)
@@ -222,12 +239,18 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
 
         if (sessionId != null) {
             sessionsRef.child(sessionId).setValue(session)
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(requireContext(), "Session saved! You earned " + points + " points", Toast.LENGTH_LONG).show();
-                        navigateToFeedback(sessionId, aiScore, selectedMinutes);
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Toast.makeText(requireContext(), "Session saved! You earned " + points + " points", Toast.LENGTH_LONG).show();
+                            navigateToFeedback(sessionId, aiScore, selectedMinutes);
+                        }
                     })
-                    .addOnFailureListener(e -> {
-                        Log.e("firebase", "failed to save session", e);
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e("firebase", "failed to save session", e);
+                        }
                     });
         }
     }

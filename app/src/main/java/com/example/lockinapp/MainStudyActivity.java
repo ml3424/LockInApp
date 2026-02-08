@@ -1,11 +1,14 @@
 package com.example.lockinapp;
 
 import android.os.Bundle;
+import android.view.MenuItem;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
 
 public class MainStudyActivity extends AppCompatActivity {
 
@@ -24,23 +27,27 @@ public class MainStudyActivity extends AppCompatActivity {
             bottomNavigation.setSelectedItemId(R.id.nav_study);
         }
 
-        // setup navigation listener
-        bottomNavigation.setOnItemSelectedListener(item -> {
-            Fragment selectedFragment = null;
-            int id = item.getItemId();
+        bottomNavigation.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                Fragment selectedFragment = null;
+                int id = item.getItemId();
 
-            if (id == R.id.nav_stats) {
-                selectedFragment = new StatsFragment();
-            } else if (id == R.id.nav_study) {
-                selectedFragment = new StudyFragment();
-            } else if (id == R.id.nav_store) {
-                selectedFragment = new StoreFragment();
-            }
+                if (id == R.id.nav_stats) {
+                    selectedFragment = new StatsFragment();
+                } else if (id == R.id.nav_study) {
+                    selectedFragment = new StudyFragment();
+                } else if (id == R.id.nav_store) {
+                    selectedFragment = new StoreFragment();
+                }
 
-            if (selectedFragment != null) {
-                loadFragment(selectedFragment);
+                if (selectedFragment != null) {
+                    loadFragment(selectedFragment);
+                }
+
+                // return true to display the item as the selected item
+                return true;
             }
-            return true;
         });
     }
 
