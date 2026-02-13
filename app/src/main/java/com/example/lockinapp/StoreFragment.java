@@ -1,6 +1,9 @@
 package com.example.lockinapp;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -138,6 +141,7 @@ public class StoreFragment extends Fragment {
             if (purchaseKey != null) {
                 userRewardsRef.child(purchaseKey).setValue(purchaseData);
             }
+            saveRewardLocally(reward.getRewardId());
 
             Toast.makeText(getContext(), "Purchased: " + reward.getName() + "!", Toast.LENGTH_SHORT).show();
 
@@ -145,5 +149,54 @@ public class StoreFragment extends Fragment {
         else {
             Toast.makeText(getContext(), "Not enough points!", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void saveRewardLocally(String rewardId) {
+        SharedPreferences sharedPref = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+
+        // r1: pink bubble theme - saves as a theme string
+        if (rewardId.equals("r1")) {
+            editor.putString("active_theme", "pink");
+            Log.d("StoreFragment", "theme set to pink");
+        }
+
+        // r2: dark mode pro - saves as a theme string
+        if (rewardId.equals("r2")) {
+            editor.putString("active_theme", "dark");
+            Log.d("StoreFragment", "theme set to dark");
+        }
+
+        // r3: double points boost - boolean flag
+        if (rewardId.equals("r3")) {
+            editor.putBoolean("has_point_booster", true);
+            Log.d("StoreFragment", "double points booster activated");
+        }
+
+        // r4: nature background - saves as a theme string
+        if (rewardId.equals("r4")) {
+            editor.putString("active_theme", "nature");
+            Log.d("StoreFragment", "theme set to nature");
+        }
+
+        // r5: focus shield - saves as boolean
+        if (rewardId.equals("r5")) {
+            editor.putBoolean("has_focus_shield", true);
+            Log.d("StoreFragment", "focus shield activated");
+        }
+
+        // r6: golden badge - saves as boolean
+        if (rewardId.equals("r6")) {
+            editor.putBoolean("has_golden_badge", true);
+            Log.d("StoreFragment", "golden badge unlocked");
+        }
+
+        // r7: custom font pack - saves as boolean
+        if (rewardId.equals("r7")) {
+            editor.putBoolean("has_custom_font", true);
+            Log.d("StoreFragment", "custom font unlocked");
+        }
+
+        editor.apply();
     }
 }

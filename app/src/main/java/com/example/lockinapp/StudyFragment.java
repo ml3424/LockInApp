@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -46,6 +47,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
     private Button btnToggleTimer, btnLogOut;
     private Spinner spinnerSubjects;
     private PreviewView cameraPreview; // XML view needed for camera
+    private View mainLayout;
 
     private StudyCameraManager cameraManager;
 
@@ -53,6 +55,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
     private boolean isTimerRunning = false;
     private int selectedMinutes = 0;
     private String selectedSubject = "";
+
 
     public StudyFragment() {
         // required empty public constructor
@@ -71,6 +74,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         btnLogOut = view.findViewById(R.id.btnLogOut);
         spinnerSubjects = view.findViewById(R.id.spinnerSubjects);
         cameraPreview = view.findViewById(R.id.cameraPreview);
+        mainLayout = view.findViewById(R.id.main);
 
         currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
@@ -222,9 +226,9 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         // start with 10 points per minute
         int pointsEarned = selectedMinutes * 10;
 
-        // bonus for persistence: if session > 15 minutes, add 5 points
-        // todo: check shared preference user has bounds once i have shared preference
-        if (selectedMinutes >= 15) {
+        SharedPreferences sharedPref = requireContext().getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        boolean hasBooster = sharedPref.getBoolean("has_point_booster", false);
+        if (selectedMinutes >= 15 && hasBooster) {
             pointsEarned += 5;
         }
 
@@ -310,6 +314,32 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
                 }
             }
         });
+    }
+
+    private void applyUserPreferences() {
+        SharedPreferences sharedPref = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+
+        // check for theme setting
+        String activeTheme = sharedPref.getString("active_theme", "default");
+
+        if (mainLayout != null) {
+            // reset to default first
+            mainLayout.setBackgroundColor(Color.WHITE);
+            tvSelectedTime.setTextColor(Color.BLACK);
+
+            if (activeTheme.equals("dark")) {
+                mainLayout.setBackgroundColor(Color.parseColor("#212121")); // dark gray
+                tvSelectedTime.setTextColor(Color.WHITE);
+            }
+            else if (activeTheme.equals("pink")) {
+                mainLayout.setBackgroundColor(Color.parseColor("#F8BBD0")); // light pink
+                tvSelectedTime.setTextColor(Color.parseColor("#880E4F")); // dark pink text
+            }
+            else if (activeTheme.equals("nature")) {
+                mainLayout.setBackgroundColor(Color.parseColor("#C8E6C9")); // light green
+                tvSelectedTime.setTextColor(Color.parseColor("#1B5E20")); // dark green text
+            }
+        }
     }
 
     private void navigateToFeedback(String sessionId, int score, int durationMin) {
