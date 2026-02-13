@@ -212,6 +212,34 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         saveSessionToFirebase();
     }
 
+    private int calcSessionScore()
+    {
+        int aiScore = cameraManager.getAverageScore();
+        String currentTime = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
+                java.util.Locale.getDefault()).format(new java.util.Date());
+
+        // points algorithm
+        // start with 10 points per minute
+        int pointsEarned = selectedMinutes * 10;
+
+        // bonus for persistence: if session > 15 minutes, add 5 points
+        // todo: check shared preference user has bounds
+        if (selectedMinutes >= 15) {
+            pointsEarned += 5;
+        }
+
+        // ai concentration multiplier: 20% bonus for high focus (>80)
+        if (aiScore > 80) {
+            pointsEarned = (int) (pointsEarned * 1.2);
+        }
+        // penalty for very low focus (<50)
+        else if (aiScore < 50 && aiScore > 0) {
+            pointsEarned = (int) (pointsEarned * 0.9);
+        }
+
+        return pointsEarned;
+    }
+
     private void saveSessionToFirebase()
     {
         DatabaseReference sessionsRef = FirebaseDatabase.getInstance().getReference("StudySessions");
@@ -219,9 +247,8 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         // generate a unique ID for this session
         String sessionId = sessionsRef.push().getKey();
 
-        // calculate data
         long durationSeconds = selectedMinutes * 60;
-        int points = (int) (selectedMinutes * 10); // 10 points per minute
+        int points = calcSessionScore();
         int aiScore = cameraManager.getAverageScore();
         String currentTime = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
                 java.util.Locale.getDefault()).format(new java.util.Date());
