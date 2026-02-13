@@ -223,7 +223,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         int pointsEarned = selectedMinutes * 10;
 
         // bonus for persistence: if session > 15 minutes, add 5 points
-        // todo: check shared preference user has bounds
+        // todo: check shared preference user has bounds once i have shared preference
         if (selectedMinutes >= 15) {
             pointsEarned += 5;
         }
@@ -243,6 +243,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
     private void saveSessionToFirebase()
     {
         DatabaseReference sessionsRef = FirebaseDatabase.getInstance().getReference("StudySessions");
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("Users").child(currentUserId);
 
         // generate a unique ID for this session
         String sessionId = sessionsRef.push().getKey();
@@ -269,6 +270,8 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
+                            updateUserGlobalPoints(userRef, points, durationSeconds);
+
                             Toast.makeText(requireContext(), "Session saved! You earned " + points + " points", Toast.LENGTH_LONG).show();
                             navigateToFeedback(sessionId, aiScore, selectedMinutes);
                         }
@@ -280,6 +283,33 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
                         }
                     });
         }
+    }
+
+    // helper method to update the user's total and current points
+    private void updateUserGlobalPoints(DatabaseReference userRef, int earned, long durationSeconds) {
+        userRef.get().addOnSuccessListener(new OnSuccessListener<com.google.firebase.database.DataSnapshot>() {
+            @Override
+            public void onSuccess(com.google.firebase.database.DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    // fetching current values from firebase
+                    int currentPoints = 0;
+                    int totalPoints = 0;
+                    long totalTime = 0;
+
+                    if (snapshot.hasChild("currentPoints"))
+                        currentPoints = snapshot.child("currentPoints").getValue(Integer.class);
+                    if (snapshot.hasChild("totalPoints"))
+                        totalPoints = snapshot.child("totalPoints").getValue(Integer.class);
+                    if (snapshot.hasChild("totalStudyTime"))
+                        totalTime = snapshot.child("totalStudyTime").getValue(Long.class);
+
+                    // updating the values
+                    userRef.child("currentPoints").setValue(currentPoints + earned);
+                    userRef.child("totalPoints").setValue(totalPoints + earned);
+                    userRef.child("totalStudyTime").setValue(totalTime + durationSeconds);
+                }
+            }
+        });
     }
 
     private void navigateToFeedback(String sessionId, int score, int durationMin) {
