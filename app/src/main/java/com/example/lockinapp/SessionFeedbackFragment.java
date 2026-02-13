@@ -87,11 +87,11 @@ public class SessionFeedbackFragment extends Fragment {
         }
 
         // build a professional prompt for gemini
-        String prompt = "The user finished a study session. " +
+        String prompt = "The user finished a study session, be sure to knowledge the user's feeling. " +
                 "Duration: " + sessionDurationMin + " minutes. " +
                 "AI Concentration Score: " + sessionScore + "/100. " +
                 "User's feeling: '" + userFeedback + "'. " +
-                "Provide a short, warm, motivating feedback and one tip for the next session in Hebrew.";
+                "Provide a short, warm, motivating feedback  and one tip for the next session in Hebrew. no more then 5 sentences.";
 
         tvAiFeedback.setText("Thinking...");
         btnSendFeedback.setEnabled(false);
