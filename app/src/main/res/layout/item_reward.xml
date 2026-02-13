@@ -51,11 +51,11 @@
             android:id="@+id/btnBuy"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="#673AB7"
+            android:backgroundTint="#B9BBC3"
+            android:textColor="#212121"
             android:fontFamily="@font/actor"
             android:padding="10dp"
-            android:text="Buy Now"
-            android:textColor="@android:color/white" />
+            android:text="Buy Now" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

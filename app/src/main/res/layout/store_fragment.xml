@@ -33,14 +33,14 @@
             android:id="@+id/tVUserPoints"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#E1BEE7"
+            android:background="#B9BBC3"
             android:fontFamily="@font/actor"
             android:paddingStart="20dp"
             android:paddingTop="8dp"
             android:paddingEnd="20dp"
             android:paddingBottom="8dp"
             android:text="My Points: "
-            android:textColor="#7B1FA2"
+            android:textColor="#212121"
             android:textSize="20sp" />
 
     </LinearLayout>

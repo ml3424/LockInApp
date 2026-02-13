@@ -26,7 +26,9 @@
                 android:layout_weight="1"
                 android:fontFamily="@font/actor"
                 android:text="Log out"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:backgroundTint="#B9BBC3"
+                android:textColor="#212121" />
 
             <Space
                 android:layout_width="0dp"
@@ -113,7 +115,9 @@
                 android:layout_weight="1"
                 android:fontFamily="@font/actor"
                 android:text="Start!"
-                android:textSize="18sp" />
+                android:textSize="18sp"
+                android:backgroundTint="#B9BBC3"
+                android:textColor="#212121" />
 
             <Space
                 android:layout_width="0dp"

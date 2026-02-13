@@ -24,7 +24,9 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="end"
                 android:fontFamily="@font/actor"
-                android:text="Back" />
+                android:text="Back"
+                android:backgroundTint="#B9BBC3"
+                android:textColor="#212121" />
         </LinearLayout>
 
         <TextView
@@ -54,7 +56,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:text="send"
-                android:fontFamily="@font/actor" />
+                android:fontFamily="@font/actor"
+                android:backgroundTint="#B9BBC3"
+                android:textColor="#212121" />
         </LinearLayout>
 
         <LinearLayout
