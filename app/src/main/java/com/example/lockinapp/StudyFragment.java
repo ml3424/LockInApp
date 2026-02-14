@@ -225,12 +225,6 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         // start with 10 points per minute
         int pointsEarned = selectedMinutes * 10;
 
-        SharedPreferences sharedPref = requireContext().getSharedPreferences("UserPrefs", MODE_PRIVATE);
-        boolean hasBooster = sharedPref.getBoolean("has_point_booster", false);
-        if (selectedMinutes >= 15 && hasBooster) {
-            pointsEarned += 5;
-        }
-
         // ai concentration multiplier: 20% bonus for high focus (>80)
         if (aiScore > 80) {
             pointsEarned = (int) (pointsEarned * 1.2);
@@ -238,6 +232,16 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         // penalty for very low focus (<50)
         else if (aiScore < 50 && aiScore > 0) {
             pointsEarned = (int) (pointsEarned * 0.9);
+        }
+
+        SharedPreferences sharedPref = requireContext().getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        boolean hasBooster = sharedPref.getBoolean("has_point_booster", false);
+        if(hasBooster)
+        {
+            pointsEarned *= 1.35;
+        }
+        if (selectedMinutes >= 15) {
+            pointsEarned += 5;
         }
 
         return pointsEarned;
