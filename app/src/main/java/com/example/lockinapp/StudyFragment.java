@@ -57,9 +57,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
     private String selectedSubject = "";
 
 
-    public StudyFragment() {
-        // required empty public constructor
-    }
+    public StudyFragment() {}
 
     @Nullable
     @Override
@@ -86,6 +84,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         setupSpinner();
         setupSeekBar();
         setupButtons();
+        applyUserPreferences();
 
         // inflate the layout for this fragment
         return view;
