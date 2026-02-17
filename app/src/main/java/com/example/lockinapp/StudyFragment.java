@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -44,6 +46,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
 
     private SeekBar seekBarTime;
     private TextView tvSelectedTime;
+    private ImageView ivGoldenBadge;
     private Button btnToggleTimer, btnLogOut;
     private Spinner spinnerSubjects;
     private PreviewView cameraPreview; // XML view needed for camera
@@ -68,6 +71,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         // find views within the inflated view object
         seekBarTime = view.findViewById(R.id.seekBarTime);
         tvSelectedTime = view.findViewById(R.id.tvSelectedTime);
+        ivGoldenBadge = view.findViewById(R.id.ivGoldenBadge);
         btnToggleTimer = view.findViewById(R.id.btnToggleTimer);
         btnLogOut = view.findViewById(R.id.btnLogOut);
         spinnerSubjects = view.findViewById(R.id.spinnerSubjects);
@@ -310,7 +314,6 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
                     if (snapshot.hasChild("totalStudyTime"))
                         totalTime = snapshot.child("totalStudyTime").getValue(Long.class);
 
-                    // updating the values
                     userRef.child("currentPoints").setValue(currentPoints + earned);
                     userRef.child("totalPoints").setValue(totalPoints + earned);
                     userRef.child("totalStudyTime").setValue(totalTime + durationSeconds);
@@ -326,7 +329,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         String activeTheme = sharedPref.getString("active_theme", "default");
 
         if (mainLayout != null) {
-            // reset to default first
+            // reset to default
             mainLayout.setBackgroundColor(Color.WHITE);
             tvSelectedTime.setTextColor(Color.BLACK);
 
@@ -342,6 +345,28 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
                 mainLayout.setBackgroundColor(Color.parseColor("#C8E6C9")); // light green
                 tvSelectedTime.setTextColor(Color.parseColor("#1B5E20")); // dark green text
             }
+        }
+
+        String activeFont = sharedPref.getString("active_font", "default");
+
+        if (activeFont.equals("retro")) {
+            tvSelectedTime.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
+        }
+        else if (activeFont.equals("classic")) {
+            tvSelectedTime.setTypeface(Typeface.SERIF, Typeface.BOLD);
+        }
+        else {
+            // default font
+            tvSelectedTime.setTypeface(Typeface.DEFAULT_BOLD);
+        }
+
+        boolean hasBadge = sharedPref.getBoolean("has_golden_badge", false);
+        if (hasBadge && ivGoldenBadge != null) {
+            // if purchased, show the image on screen
+            ivGoldenBadge.setVisibility(View.VISIBLE);
+        }
+        else if (ivGoldenBadge != null) {
+            ivGoldenBadge.setVisibility(View.GONE);
         }
     }
 
