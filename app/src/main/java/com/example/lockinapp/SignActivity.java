@@ -7,12 +7,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -26,6 +28,7 @@ public class SignActivity extends AppCompatActivity {
     private EditText eTEmail, eTPassword;
     private TextView tVSign, tVSignClick;
     private CheckBox cBRemember;
+    private ImageView ivAppLogo;
 
     private FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
     private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -43,8 +46,13 @@ public class SignActivity extends AppCompatActivity {
         tVSign = findViewById(R.id.tVSign);
         tVSignClick = findViewById(R.id.tVSignClick);
         cBRemember = findViewById(R.id.cBRemember);
+        ivAppLogo = findViewById(R.id.ivLogo);
 
         sP = getSharedPreferences("stay_logged_in", MODE_PRIVATE);
+        String logoUrl = "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Rocket/3D/rocket_3d.png";
+        Glide.with(this)
+                .load(logoUrl)
+                .into(ivAppLogo);
     }
 
     @Override
