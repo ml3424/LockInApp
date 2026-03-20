@@ -39,8 +39,13 @@ public class SignActivity extends AppCompatActivity {
     private int sign = 0;
 
     /**
-     * Initializes the activity and loads the app logo using Glide.
-     * @param savedInstanceState If the activity is being re-initialized, this contains the data.
+     * Initializes the activity and implements a "Lazy Sign-out" strategy.
+     * <p>
+     * Checks if the user enabled "stayConnected". If not, signs them out only on
+     * a fresh app launch (onCreate) to prevent logout during multitasking,
+     * while ensuring re-authentication is required after the app is closed.
+     *
+     * @param savedInstanceState Bundle containing the activity's saved state.
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,17 +61,7 @@ public class SignActivity extends AppCompatActivity {
 
         sP = getSharedPreferences("stay_logged_in", MODE_PRIVATE);
         Glide.with(this).load(logoUrl).into(iVAppLogo);
-    }
 
-    /**
-     * Checks for an existing user session on startup.
-     * <p>
-     * If a user is logged in and "stayConnected" is true, redirects to Main;
-     * otherwise, signs the user out.
-     */
-    @Override
-    protected void onStart() {
-        super.onStart();
         FirebaseUser currentUser = mFirebaseAuth.getCurrentUser();
         boolean isRemembered = sP.getBoolean("stayConnected", false);
 
