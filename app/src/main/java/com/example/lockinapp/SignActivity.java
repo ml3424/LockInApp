@@ -38,6 +38,10 @@ public class SignActivity extends AppCompatActivity {
 
     private int sign = 0;
 
+    /**
+     * Initializes the activity and loads the app logo using Glide.
+     * @param savedInstanceState If the activity is being re-initialized, this contains the data.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +58,12 @@ public class SignActivity extends AppCompatActivity {
         Glide.with(this).load(logoUrl).into(iVAppLogo);
     }
 
+    /**
+     * Checks for an existing user session on startup.
+     * <p>
+     * If a user is logged in and "stayConnected" is true, redirects to Main;
+     * otherwise, signs the user out.
+     */
     @Override
     protected void onStart() {
         super.onStart();

@@ -14,6 +14,9 @@ public class MainStudyActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNavigation;
 
+    /**
+     * Sets up the main study screen, loads the default {@code StudyFragment} on startup.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,9 +38,11 @@ public class MainStudyActivity extends AppCompatActivity {
 
                 if (id == R.id.nav_stats) {
                     selectedFragment = new StatsFragment();
-                } else if (id == R.id.nav_study) {
+                }
+                else if (id == R.id.nav_study) {
                     selectedFragment = new StudyFragment();
-                } else if (id == R.id.nav_store) {
+                }
+                else if (id == R.id.nav_store) {
                     selectedFragment = new StoreFragment();
                 }
 
@@ -51,7 +56,10 @@ public class MainStudyActivity extends AppCompatActivity {
         });
     }
 
-    // method to switch fragments
+    /**
+     * Replaces the current fragment in the container with a new one.
+     * @param fragment The new Fragment instance to display.
+     */
     private void loadFragment(Fragment fragment) {
         getSupportFragmentManager()
                 .beginTransaction()
