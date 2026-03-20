@@ -44,7 +44,7 @@
                     android:layout_weight="1" />
 
                 <ImageView
-                    android:id="@+id/ivLogo"
+                    android:id="@+id/iVLogo"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="8"

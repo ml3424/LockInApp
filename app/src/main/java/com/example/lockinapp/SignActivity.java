@@ -25,14 +25,16 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class SignActivity extends AppCompatActivity {
 
+    private final String logoUrl = "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Rocket/3D/rocket_3d.png";
+
     private EditText eTEmail, eTPassword;
     private TextView tVSign, tVSignClick;
     private CheckBox cBRemember;
-    private ImageView ivAppLogo;
+    private ImageView iVAppLogo;
 
     private FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
     private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
-    private SharedPreferences sP; // shared preferences reference
+    private SharedPreferences sP;
 
     private int sign = 0;
 
@@ -46,49 +48,54 @@ public class SignActivity extends AppCompatActivity {
         tVSign = findViewById(R.id.tVSign);
         tVSignClick = findViewById(R.id.tVSignClick);
         cBRemember = findViewById(R.id.cBRemember);
-        ivAppLogo = findViewById(R.id.ivLogo);
+        iVAppLogo = findViewById(R.id.iVLogo);
 
         sP = getSharedPreferences("stay_logged_in", MODE_PRIVATE);
-        String logoUrl = "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Rocket/3D/rocket_3d.png";
-        Glide.with(this)
-                .load(logoUrl)
-                .into(ivAppLogo);
+        Glide.with(this).load(logoUrl).into(iVAppLogo);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        // check if user is already signed in and checkbox was checked
         FirebaseUser currentUser = mFirebaseAuth.getCurrentUser();
-        boolean isRemembered = sP.getBoolean("stayConnected", false); // get key stayConnected from shared preferences
+        boolean isRemembered = sP.getBoolean("stayConnected", false);
 
-        if (currentUser != null && isRemembered) {
-            // go directly to main study activity
-            goToMainActivity(currentUser.getUid());
+        if (currentUser != null) {
+            if(isRemembered)
+            {
+                goToMainActivity(currentUser.getUid());
+            }
+            else {
+                mFirebaseAuth.signOut();
+            }
         }
     }
 
+    /**
+     * Registers a new user using Firebase Authentication and initializes their profile in the database.
+     * <p>
+     * This method validates the email and password input fields, creates a new account,
+     * saves login preferences, and stores a new {@code User} object in the Realtime Database
+     * before navigating to the main activity.
+     */
     private void registerUser() {
-        // extract input text and trim space
         String email = eTEmail.getText().toString().trim();
         String password = eTPassword.getText().toString().trim();
 
-        // check the fields are not empty
         if (email.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Please fill in both fields.", Toast.LENGTH_LONG).show();
             return;
         }
-        // use firebase auth to create a new user
+
         mFirebaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful())
                         {
-                            // save preference based on checkbox
                             saveLoginPreference();
 
-                            String userId = mFirebaseAuth.getCurrentUser().getUid(); // UID as userId
+                            String userId = mFirebaseAuth.getCurrentUser().getUid();
                             User newUser = new User(userId, email.split("@")[0]); // the name is the first part of the email
 
                             mDatabase.child("Users").child(userId).setValue(newUser)
@@ -115,9 +122,15 @@ public class SignActivity extends AppCompatActivity {
                         }
                     }
                 });
-        // create user to save in firebase
     }
 
+    /**
+     * Authenticates an existing user with Firebase using an email and password.
+     * <p>
+     * This method retrieves user credentials from the input fields, performs a basic
+     * validation check, and attempts to sign in. Upon success, it updates login
+     * preferences and navigates the user to the main activity.D
+     */
     private void signinUser() {
         String email = eTEmail.getText().toString().trim();
         String password = eTPassword.getText().toString().trim();
@@ -132,32 +145,36 @@ public class SignActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // save preference based on checkbox
                             saveLoginPreference();
 
                             Toast.makeText(SignActivity.this, "Welcome back!", Toast.LENGTH_SHORT).show();
-
-                            // retrieve the unique identifier for the authenticated user
                             String userId = mFirebaseAuth.getCurrentUser().getUid();
 
                             goToMainActivity(userId);
                         } else {
-                            // provide specific feedback from firebase if the authentication fails
-                            Toast.makeText(SignActivity.this, "Login failed: " +
-                                    task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(SignActivity.this, "Login failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                         }
                     }
                 });
     }
 
-    // helper method to save preference
+    /**
+     * Saves the user's login preference to SharedPreferences.
+     * <p>
+     * Specifically, it stores whether the "Remember Me" checkbox is checked
+     * to determine if the user should remain connected in future sessions.
+     */
     private void saveLoginPreference() {
         SharedPreferences.Editor editor = sP.edit();
         editor.putBoolean("stayConnected", cBRemember.isChecked());
         editor.apply();
     }
 
-    // helper method to navigate to main screen
+    /**
+     * Navigates from the sign-in/up screen to the main study activity.
+     * * @param userId The unique identifier of the authenticated user to be passed
+     * to the next activity.
+     */
     private void goToMainActivity(String userId) {
         Intent studyIntent = new Intent(SignActivity.this, MainStudyActivity.class);
         studyIntent.putExtra("USER_ID", userId);
@@ -165,6 +182,13 @@ public class SignActivity extends AppCompatActivity {
         finish(); // to get back to the screen only use logout
     }
 
+    /**
+     * Handles the main action button click (Sign In or Sign Up).
+     * <p>
+     * Depending on the current toggle state ({@code sign}), it triggers
+     * either the login or the registration flow.
+     * * @param view The view that was clicked.
+     */
     public void onEnter(View view) {
         if(sign == 0) // sign in = 0
         {
@@ -176,6 +200,13 @@ public class SignActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Toggles the UI state between "Sign In" and "Sign Up" modes.
+     * <p>
+     * Updates the {@code sign} flag and modifies the text of relevant
+     * TextViews to reflect the current mode to the user.
+     * * @param view The view that was clicked.
+     */
     public void on_change_sign(View view) {
         if(sign == 0) // sign in = 0
         {
