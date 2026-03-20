@@ -137,10 +137,11 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
     }
 
     /**
-     * Registers the {@code timerReceiver} to listen for local broadcasts.
+     * Resumes fragment operations, synchronizes timer state, and registers receivers.
      * <p>
-     * This method initializes an {@code IntentFilter} for timer updates and
-     * completion events, ensuring the UI stays synchronized with the background service.
+     * This method checks SharedPreferences to see if a background timer has expired
+     * while the app was inactive. If active, it restores the broadcast receiver
+     * for live updates and resumes camera monitoring.
      */
     @Override
     public void onResume() {
@@ -161,17 +162,28 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         filter.addAction("TIMER_UPDATE");
         filter.addAction("TIMER_FINISHED");
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(timerReceiver, filter);
+
+        if (cameraManager != null && isTimerRunning) {
+            cameraManager.resumeCaptures();
+        }
     }
 
     /**
-     * Unregisters the {@code timerReceiver} to prevent memory leaks.
+     * Suspends fragment operations and cleans up transient resources.
      * <p>
-     * Stops listening for broadcasts when the fragment is not in the foreground.
+     * Unregisters the {@code timerReceiver} to prevent memory leaks and
+     * pauses camera captures to conserve system resources while the fragment
+     * is not in the foreground.
      */
     @Override
     public void onPause() {
-        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(timerReceiver);
         super.onPause();
+
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(timerReceiver);
+
+        if (cameraManager != null) {
+            cameraManager.pauseCaptures();
+        }
     }
 
     @Override

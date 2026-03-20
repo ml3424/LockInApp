@@ -61,28 +61,22 @@ public class StudyCameraManager {
             @Override
             public void run() {
                 try {
-                    // retrieve the camera provider after it is initialized
                     ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
 
-                    // initialize the preview use case to display the camera feed
+                    // preview use case to display the camera feed
                     Preview preview = new Preview.Builder().build();
                     // link the preview to the previewView in the layout
                     preview.setSurfaceProvider(previewView.getSurfaceProvider());
 
-                    // initialize the image capture use case for taking photos
                     imageCapture = new ImageCapture.Builder().build();
-
-                    // select the front camera as the default
                     CameraSelector cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA;
 
                     try {
-                        // unbind any existing use cases before rebinding new ones
                         cameraProvider.unbindAll();
                         // bind the camera to the lifecycle of the fragment
                         cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageCapture);
                     }
                     catch (Exception exc) {
-                        // handle errors during use case binding
                         Log.e("CameraManager", "Use case binding failed", exc);
                     }
 
@@ -105,7 +99,6 @@ public class StudyCameraManager {
                 if (isRunning) {
                     takePictureAndAnalyze();
                     // Schedule next capture (random between 30 sec to 3 min)
-                    // For testing, you can reduce this (e.g., 10000 + random(20000))
                     long nextDelay = 30000 + random.nextInt(150000);
                     randomCaptureHandler.postDelayed(this, nextDelay);
                 }
@@ -119,6 +112,18 @@ public class StudyCameraManager {
         isRunning = false;
         if (randomCaptureRunnable != null) {
             randomCaptureHandler.removeCallbacks(randomCaptureRunnable);
+        }
+    }
+
+    public void pauseCaptures() {
+        if (randomCaptureRunnable != null) {
+            randomCaptureHandler.removeCallbacks(randomCaptureRunnable);
+        }
+    }
+
+    public void resumeCaptures() {
+        if (isRunning && randomCaptureRunnable != null) {
+            randomCaptureHandler.postDelayed(randomCaptureRunnable, 5000);
         }
     }
 
