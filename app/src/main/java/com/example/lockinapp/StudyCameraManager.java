@@ -145,29 +145,22 @@ public class StudyCameraManager {
     }
 
     /**
-     * Permanently stops the focus monitoring cycle.
+     * Permanently halts the focus monitoring cycle and cleans up resources.
      * <p>
-     * Sets the {@code isRunning} flag to false and removes all pending
-     * capture requests from the handler's execution queue.
+     * This method sets the {@code isRunning} flag to false to prevent further cycles
+     * and calls {@link #pauseCaptures()} to remove any pending tasks from the queue.
      */
     public void stopRandomCaptures() {
         isRunning = false;
-        if (cameraExecutor != null && !cameraExecutor.isShutdown()) {
-            cameraExecutor.shutdown();
-        }
-        if (randomCaptureRunnable != null) {
-            randomCaptureHandler.removeCallbacks(randomCaptureRunnable);
-        }
-        if (cameraProvider != null) {
-            cameraProvider.unbindAll();
-        }
+        pauseCaptures();
     }
 
     /**
-     * Temporarily suspends automated captures without resetting the session state.
+     * Temporarily suspends automated captures by clearing the execution queue.
      * <p>
-     * Clears pending capture callbacks from the {@code Handler}. This is typically
-     * called when the app enters the background to conserve battery and privacy.
+     * Removes the {@code randomCaptureRunnable} from the {@code Handler}.
+     * This is used both for temporary backgrounding (Pause) and as part of a
+     * complete shutdown (Stop).
      */
     public void pauseCaptures() {
         if (randomCaptureRunnable != null) {
@@ -279,6 +272,19 @@ public class StudyCameraManager {
         });
     }
 
+    /**
+     * Converts an {@code ImageProxy} from CameraX into a processed {@code Bitmap}.
+     * <p>
+     * This helper method extracts the byte buffer, decodes it, and applies
+     * necessary transformations including:
+     * <p>
+     * <li><b>Rotation:</b> Aligns the image based on the device's orientation.</li>
+     * <li><b>Mirroring:</b> Flips the image horizontally to compensate for the
+     * front camera's default mirror effect, ensuring natural analysis.</li>
+     *
+     * @param image The raw image proxy from the camera capture.
+     * @return A correctly oriented and flipped Bitmap, or null if decoding fails.
+     */
     private Bitmap imageProxyToBitmap(ImageProxy image) {
         ByteBuffer buffer = image.getPlanes()[0].getBuffer();
         byte[] bytes = new byte[buffer.remaining()];
