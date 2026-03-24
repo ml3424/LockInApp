@@ -1,5 +1,7 @@
 package com.example.lockinapp;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -7,6 +9,7 @@ import android.graphics.Matrix;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.camera.core.CameraSelector;
@@ -26,13 +29,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class StudyCameraManager {
 
     private final Context context;
     private final LifecycleOwner lifecycleOwner;
     private final PreviewView previewView;
+    private final ExecutorService cameraExecutor = Executors.newSingleThreadExecutor();
 
+    private ProcessCameraProvider cameraProvider;
     private ImageCapture imageCapture;
     private final List<Integer> concentrationScores;
 
@@ -41,6 +48,16 @@ public class StudyCameraManager {
     private final Random random;
     private boolean isRunning = false;
 
+    /**
+     * Initializes the Camera Manager with required Android and Lifecycle components.
+     * <p>
+     * Sets up the context, lifecycle binding, and preview surface, while
+     * initializing data structures for focus scoring and random capture scheduling.
+     *
+     * @param context The activity context.
+     * @param lifecycleOwner The lifecycle owner (Fragment) to bind camera sessions.
+     * @param previewView The UI component used to host the camera's surface provider.
+     */
     public StudyCameraManager(Context context, LifecycleOwner lifecycleOwner, PreviewView previewView) {
         this.context = context;
         this.lifecycleOwner = lifecycleOwner;
@@ -51,6 +68,16 @@ public class StudyCameraManager {
         this.random = new Random();
     }
 
+    /**
+     * Configures and binds the CameraX lifecycle to the application.
+     * <p>
+     * This method utilizes a {@code Preview} use case to ensure optimal performance.
+     * Maintaining an active Preview stream provides:
+     * <p>
+     * Low Latency: Keeps the hardware(camera) "warm" to eliminate opening it to every pic.
+     * Image Quality: Enables continuous Auto-Focus and Exposure for clear Gemini analysis.
+     * Stability: Provides the required Surface(view that works directly with the hardware) for driver stability using {@code PreviewView}.
+     */
     public void startCamera() {
         // get an instance of the camera provider to bind the camera lifecycle
         final ListenableFuture<ProcessCameraProvider> cameraProviderFuture =
@@ -61,7 +88,7 @@ public class StudyCameraManager {
             @Override
             public void run() {
                 try {
-                    ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
+                    cameraProvider = cameraProviderFuture.get();
 
                     // preview use case to display the camera feed
                     Preview preview = new Preview.Builder().build();
@@ -88,6 +115,15 @@ public class StudyCameraManager {
         }, ContextCompat.getMainExecutor(context)); // ensure this runs on the main thread for UI safety
     }
 
+    /**
+     * Starts the automated focus monitoring cycle.
+     * <p>
+     * This method initiates a recursive {@code Handler} loop that triggers image
+     * capture and analysis at randomized intervals (between 30 seconds and 3 minutes).
+     * <p>
+     * The first capture is delayed by 10 seconds to allow the camera hardware and
+     * the user's focus to stabilize.
+     */
     public void startRandomCaptures() {
         if (isRunning) return;
         isRunning = true;
@@ -108,25 +144,57 @@ public class StudyCameraManager {
         randomCaptureHandler.postDelayed(randomCaptureRunnable, 10000);
     }
 
+    /**
+     * Permanently stops the focus monitoring cycle.
+     * <p>
+     * Sets the {@code isRunning} flag to false and removes all pending
+     * capture requests from the handler's execution queue.
+     */
     public void stopRandomCaptures() {
         isRunning = false;
+        if (cameraExecutor != null && !cameraExecutor.isShutdown()) {
+            cameraExecutor.shutdown();
+        }
         if (randomCaptureRunnable != null) {
             randomCaptureHandler.removeCallbacks(randomCaptureRunnable);
         }
+        if (cameraProvider != null) {
+            cameraProvider.unbindAll();
+        }
     }
 
+    /**
+     * Temporarily suspends automated captures without resetting the session state.
+     * <p>
+     * Clears pending capture callbacks from the {@code Handler}. This is typically
+     * called when the app enters the background to conserve battery and privacy.
+     */
     public void pauseCaptures() {
         if (randomCaptureRunnable != null) {
             randomCaptureHandler.removeCallbacks(randomCaptureRunnable);
         }
     }
 
+    /**
+     * Restarts the monitoring cycle after a pause, if the session is still active.
+     * <p>
+     * Re-schedules the capture loop with a brief 5-second buffer to allow
+     * the camera hardware to stabilize after returning to the foreground.
+     */
     public void resumeCaptures() {
         if (isRunning && randomCaptureRunnable != null) {
             randomCaptureHandler.postDelayed(randomCaptureRunnable, 5000);
         }
     }
 
+    /**
+     * Calculates the aiScore using concentration scores collected during the session.
+     * <p>
+     * This value represents the user's overall focus level based on Gemini's AI analysis
+     * of random captures. If no scores were recorded, it returns a default of 0.
+     *
+     * @return The average concentration score as an integer (0-100).
+     */
     public int getAverageScore() {
         if (concentrationScores.isEmpty()) return 0;
         int sum = 0;
@@ -136,11 +204,17 @@ public class StudyCameraManager {
         return sum / concentrationScores.size();
     }
 
+    /**
+     * Captures a single frame from the camera and initiates the AI analysis pipeline.
+     * <p>
+     * This method triggers the {@code ImageCapture} use case. Upon a successful
+     * capture, the resulting {@code ImageProxy} is converted into a {@code Bitmap},
+     * the memory is immediately released, and the image is sent to Gemini.
+     */
     private void takePictureAndAnalyze() {
         if (imageCapture == null) return;
 
-        imageCapture.takePicture(ContextCompat.getMainExecutor(context),
-                new ImageCapture.OnImageCapturedCallback() {
+        imageCapture.takePicture(cameraExecutor, new ImageCapture.OnImageCapturedCallback() {
                     @Override
                     public void onError(@NonNull ImageCaptureException exception) {
                         Log.e("CameraManager", "Photo capture failed: " + exception.getMessage());
@@ -157,8 +231,18 @@ public class StudyCameraManager {
                 });
     }
 
+    /**
+     * Sends a captured frame to the Gemini for focus analysis.
+     * <p>
+     * This method converts the visual data into a concentration score (0-100).
+     * If the AI returns 101, it indicates that no face was detected, triggering
+     * a user notification. Valid scores are stored in {@code concentrationScores}
+     * for final session averaging.
+     *
+     * @param bitmap The processed image frame to be analyzed.
+     */
     private void sendToGemini(Bitmap bitmap) {
-        String prompt = "Analyze the person's face. Estimate concentration level (0-100). Return ONLY the number.";
+        String prompt = "Analyze the person's face. Estimate concentration level (0-100). Return ONLY the number. if the face is not shown return 101";
 
         GeminiManager.getInstance().sendTextWithPhotoPrompt(prompt, bitmap, new GeminiCallBack() {
             @Override
@@ -167,10 +251,23 @@ public class StudyCameraManager {
                     String cleanResult = result.replaceAll("[^0-9]", "");
                     if (!cleanResult.isEmpty()) {
                         int score = Integer.parseInt(cleanResult);
-                        concentrationScores.add(score);
-                        Log.d("CameraManager", "Added AI Score: " + score);
+
+                        if (score != 101) {
+                            concentrationScores.add(score);
+                            Log.d("CameraManager", "Added AI Score: " + score);
+                        }
+                        else
+                        {
+                            // since this callback may run on a background thread, used a Handler to put the Toast task back to the UI thread.
+                            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(context, "Please make sure your face is shown!", Toast.LENGTH_LONG).show();
+                                }
+                            });                        }
                     }
-                } catch (Exception e) {
+                }
+                catch (Exception e) {
                     Log.e("CameraManager", "Failed to parse score", e);
                 }
             }
@@ -188,9 +285,10 @@ public class StudyCameraManager {
         buffer.get(bytes);
         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
 
-        // Fix rotation for front camera (mirror + rotate)
         Matrix matrix = new Matrix();
+        // fix rotation
         matrix.postRotate(image.getImageInfo().getRotationDegrees());
+        // flip horizontally (-1 on X-axis) to correct front camera mirror effect
         matrix.postScale(-1f, 1f, bitmap.getWidth() / 2f, bitmap.getHeight() / 2f);
 
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
