@@ -33,11 +33,18 @@ public class TimerService extends Service implements SensorEventListener {
     private boolean isDistracted = false;
     private String cameraId;
 
-
+    /**
+     * Initializes the service and its hardware components.
+     * <p>
+     * This method sets up the {@code SensorManager} for motion detection,
+     * the {@code Vibrator} for haptic feedback.
+     * <p>
+     * It also registers a listener for the accelerometer to monitor device
+     * movement during the study session.
+     */
     @Override
     public void onCreate() {
         super.onCreate();
-        // initialize sensors and hardware
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -48,7 +55,7 @@ public class TimerService extends Service implements SensorEventListener {
             cameraId = cameraManager.getCameraIdList()[0]; // get the main camera flash
         }
         catch (Exception e) {
-            e.printStackTrace();
+            Log.e("CameraError", "Failed to get camera ID", e);
         }
 
         // register the sensor listener
@@ -57,6 +64,31 @@ public class TimerService extends Service implements SensorEventListener {
         }
     }
 
+    /**
+     * Performs cleanup before the service is destroyed.
+     * <p>
+     * This ensures that the accelerometer listener is unregistered to save battery
+     * and that any active {@code CountDownTimer} is cancelled to prevent
+     * memory leaks or background crashes.
+     */
+    @Override
+    public void onDestroy() {
+        sensorManager.unregisterListener(this);
+
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
+        super.onDestroy();
+    }
+
+    /**
+     * Processes real-time accelerometer data to detect device movement.
+     * <p>
+     * This method calculates the total acceleration vector magnitude using this formula: {@code sqrt(x² + y² + z²)}.
+     * If needed triggers a distraction alert.
+     *
+     * @param event The {@code SensorEvent} containing X, Y, and Z acceleration values.
+     */
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
@@ -67,7 +99,6 @@ public class TimerService extends Service implements SensorEventListener {
             // calculate the total acceleration force = a in physics
             double acceleration = Math.sqrt(x*x + y*y + z*z);
 
-            // if phone is moving significantly
             if (acceleration > 15) { // 15 is a threshold for significant movement
                 Log.d("Distraction", "Acceleration detected: " + acceleration);
                 startDistractionAlert();
@@ -75,6 +106,13 @@ public class TimerService extends Service implements SensorEventListener {
         }
     }
 
+    /**
+     * Triggers a multi-sensory alert to refocus the user when a distraction is detected.
+     * <p>
+     * This method provides haptic feedback (vibration) and a visual cue (flashlight blink).
+     * It handles different Android API levels for vibration and uses a {@code Handler}
+     * to automatically reset the alert state and turn off the torch after a short delay.
+     */
     private void startDistractionAlert() {
         if (isDistracted) return; // avoid multiple triggers
         isDistracted = true;
@@ -93,49 +131,66 @@ public class TimerService extends Service implements SensorEventListener {
 
         // blink the flashlight
         try {
-            cameraManager.setTorchMode(cameraId, true);
+            if (cameraId != null) {
+                cameraManager.setTorchMode(cameraId, true);
 
-            // use a handler to schedule the "turn off" action after a delay
-            new android.os.Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        cameraManager.setTorchMode(cameraId, false);
-                        isDistracted = false;
+                // use a handler to schedule the "turn off" action after a delay
+                new android.os.Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            cameraManager.setTorchMode(cameraId, false);
+                            isDistracted = false;
+                        } catch (Exception e) {
+                            Log.e("TimerService", "Flashlight error: Could not turn off torch", e);
+                        }
                     }
-                    catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }, 500);
-        } catch (Exception e) {
-            e.printStackTrace();
+                }, 500);
+            }
+            else isDistracted = false;
+        }
+        catch (Exception e) {
+            Log.e("TimerService", "Error controlling flashlight", e);
         }
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 
+    /**
+     * Handles the service start request and initializes the countdown timer.
+     * <p>
+     * This method transitions the service to the Foreground to ensure it
+     * persists even when the app is in the background. It sets up a
+     * {@code CountDownTimer} that:
+     * <ul>
+     * <li>Updates the persistent notification every second.</li>
+     * <li>Broadcasts the remaining time locally to sync with the UI.</li>
+     * <li>Stops the service and notifies the system upon completion.</li>
+     * </ul>
+     *
+     * @param intent The intent containing {@code DURATION_MIN} for the session.
+     * @return {@code START_NOT_STICKY} to prevent automatic restart if killed by the system.
+     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         int minutes = intent.getIntExtra("DURATION_MIN", 0);
         long millis = (long) minutes * 60 * 1000;
 
-        createNotificationChannel();
+        createNotiChannel();
 
-        // build initial notification to satisfy foreground requirements
         Notification notification = buildNotification("Your study session is starting...");
         startForeground(1, notification);
 
         countDownTimer = new CountDownTimer(millis, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                long m = millisUntilFinished / 60000;
-                long s = (millisUntilFinished % 60000) / 1000;
-                updateNotification("Remaining: " + String.format("%02d:%02d", m, s));
-                String timeLeft = String.format("%02d:%02d", m, s);
+                long min = millisUntilFinished / 60000;
+                long sec = (millisUntilFinished % 60000) / 1000;
 
-                // broadcast to activity
+                String timeLeft = String.format("%02d:%02d", min, sec);
+                updateNotification("Remaining: " + timeLeft);
+
                 Intent updateIntent = new Intent("TIMER_UPDATE");
                 updateIntent.putExtra("TIME_LEFT", timeLeft);
                 LocalBroadcastManager.getInstance(TimerService.this).sendBroadcast(updateIntent);
@@ -154,6 +209,14 @@ public class TimerService extends Service implements SensorEventListener {
         return START_NOT_STICKY;
     }
 
+    /**
+     * Updates the existing foreground notification with new status text.
+     * <p>
+     * This allows the user to track their study progress (e.g., time remaining)
+     * directly from the system tray or lock screen without reopening the app.
+     *
+     * @param text The new message or time string to display in the notification.
+     */
     private void updateNotification(String text) {
         NotificationManager manager = getSystemService(NotificationManager.class);
         if (manager != null) {
@@ -161,6 +224,16 @@ public class TimerService extends Service implements SensorEventListener {
         }
     }
 
+    /**
+     * Constructs a persistent notification to display the current session status.
+     * <p>
+     * The notification is set to {@code setOngoing(true)}, preventing the user
+     * from accidentally dismissing it while the study session is active.
+     * This is a requirement for maintaining the service in the Foreground.
+     *
+     * @param text The current status msg or time remaining to display.
+     * @return A configured {@code Notification} object ready for display.
+     */
     private Notification buildNotification(String text) {
         return new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("LockIn Timer")
@@ -170,7 +243,14 @@ public class TimerService extends Service implements SensorEventListener {
                 .build();
     }
 
-    private void createNotificationChannel() {
+    /**
+     * Creates a notification channel for Android Oreo (API 26) and above.
+     * <p>
+     * This method sets the importance to {@code IMPORTANCE_LOW} to ensure
+     * that periodic timer updates do not trigger intrusive sounds or
+     * visual "heads-up" interruptions, maintaining a quiet study environment.
+     */
+    private void createNotiChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID, "Study Timer", NotificationManager.IMPORTANCE_LOW);
@@ -180,16 +260,6 @@ public class TimerService extends Service implements SensorEventListener {
                 manager.createNotificationChannel(channel);
             }
         }
-    }
-
-    @Override
-    public void onDestroy() {
-        sensorManager.unregisterListener(this);
-
-        if (countDownTimer != null) {
-            countDownTimer.cancel();
-        }
-        super.onDestroy();
     }
 
     @Override
