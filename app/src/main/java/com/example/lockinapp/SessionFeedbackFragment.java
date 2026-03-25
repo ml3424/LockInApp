@@ -24,17 +24,21 @@ public class SessionFeedbackFragment extends Fragment {
     private int sessionScore;
     private long sessionDurationMin;
 
-    public SessionFeedbackFragment() {
-        // required empty public constructor
-    }
+    public SessionFeedbackFragment() {}
 
+    /**
+     * Initializes the feedback UI and retrieves session data from the last session.
+     * <p>
+     * Inflates the layout, binds UI components, and extracts the {@code sessionScore}
+     * and {@code sessionId} passed from the study session.
+     *
+     * @return The root view for the Session Feedback screen.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // inflate fragment layout
         View view = inflater.inflate(R.layout.session_feedback_fragment, container, false);
 
-        // initialize views
         eTFeedbackInput = view.findViewById(R.id.eTFeedbackInput);
         tvFeedbackScore = view.findViewById(R.id.tvFeedbackScore);
         tvAiFeedback = view.findViewById(R.id.tvAiFeedback);
@@ -51,7 +55,19 @@ public class SessionFeedbackFragment extends Fragment {
 
             tvFeedbackScore.setText(String.valueOf(sessionScore));
         }
+        setupBtns();
+        return view;
+    }
 
+    /**
+     * Configures click listeners for the feedback and navigation buttons.
+     * <p>
+     * The "Send" button triggers AI-generated insights based on the user's input,
+     * while the "Back" button safely manages the fragment backstack or
+     * redirects to the {@code StudyFragment} as a fallback.
+     */
+    private void setupBtns()
+    {
         btnSendFeedback.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,10 +90,17 @@ public class SessionFeedbackFragment extends Fragment {
                 }
             }
         });
-
-        return view;
     }
 
+    /**
+     * Generates personalized, AI-driven study insights based on session performance and user input.
+     * <p>
+     * This method puts the duration, AI-calculated concentration score, and the user's
+     * self-reported feelings into a structured prompt for the Gemini API.
+     * <p>
+     * It handles the response by updating the UI on the Main Thread and
+     * provides a motivating,summary with tips for improvement.
+     */
     private void generateAiFeedback() {
         String userFeedback = eTFeedbackInput.getText().toString().trim();
 
@@ -86,17 +109,15 @@ public class SessionFeedbackFragment extends Fragment {
             return;
         }
 
-        // build a professional prompt for gemini
         String prompt = "The user finished a study session, be sure to knowledge the user's feeling. " +
                 "Duration: " + sessionDurationMin + " minutes. " +
                 "AI Concentration Score: " + sessionScore + "/100. " +
                 "User's feeling: '" + userFeedback + "'. " +
-                "Provide a short, warm, motivating feedback  and one tip for the next session in Hebrew. no more then 5 sentences.";
+                "Provide a short, warm, motivating feedback and one tip for the next session in Hebrew. no more then 4 sentences.";
 
         tvAiFeedback.setText("Thinking...");
         btnSendFeedback.setEnabled(false);
 
-        // call gemini manager for text prompt
         geminiManager.sendTextPrompt(prompt, new GeminiCallBack() {
             @Override
             public void onSuccess(final String result) {
