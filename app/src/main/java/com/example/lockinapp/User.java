@@ -10,8 +10,14 @@ public class User {
     private String displayName;
     private List<String> extraSubjects;
 
-    public User() {} // empty constructor for firebase
+    /** Default constructor required for Firebase*/
+    public User() {}
 
+    /**
+     * Initializes a new user with default values.
+     * @param userId Unique identifier from Firebase Auth.
+     * @param displayName The user's name.
+     */
     public User(String userId, String displayName) {
         this.userId = userId;
         this.displayName = displayName;

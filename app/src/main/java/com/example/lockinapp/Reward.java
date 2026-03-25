@@ -7,9 +7,17 @@ public class Reward {
     private String description;
     private String imageUrl; // url to an external image
 
-    // empty constructor for firebase
+    /** Default constructor required for Firebase Realtime Database/Firestore. */
     public Reward() {}
 
+    /**
+     * Initializes a new Reward item.
+     * @param rewardId Unique identifier for the item.
+     * @param name Display name of the reward.
+     * @param cost Points required to unlock.
+     * @param description Brief text explaining the reward.
+     * @param imageUrl URL for the item's icon or image.
+     */
     public Reward(String rewardId, String name, int cost, String description, String imageUrl) {
         this.rewardId = rewardId;
         this.name = name;
