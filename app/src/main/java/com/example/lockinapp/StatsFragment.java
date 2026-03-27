@@ -35,7 +35,7 @@ public class StatsFragment extends Fragment {
     private TextView tvDetailedStats;
 
     private String currentUserId;
-    private List<StudySession> allSessions;
+    private List<StudySession> allSessions = new ArrayList<>();
     private List<String> dateLabels = new ArrayList<>();
 
     public StatsFragment() {
@@ -47,12 +47,10 @@ public class StatsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.stats_fragment, container, false);
 
-        // link views
         barChart = view.findViewById(R.id.barChart);
         spinnerStatsSubject = view.findViewById(R.id.spinnerStatsSubject);
         tvDetailedStats = view.findViewById(R.id.tvDetailedStats);
 
-        allSessions = new ArrayList<>();
         currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         setupSpinner();
