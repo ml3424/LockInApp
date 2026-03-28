@@ -36,14 +36,15 @@ public class StoreFragment extends Fragment {
     private TextView tVUserPoints;
 
     private StoreAdapter storeAdapter;
-    private List<Reward> rewardList  = new ArrayList<>();;
+    private List<Reward> rewardList  = new ArrayList<>();
 
-    private FirebaseDatabase database = FirebaseDatabase.getInstance();
-    private DatabaseReference rewardsRef = database.getReference("Rewards");
-    private DatabaseReference usersRef = database.getReference("Users").child(currentUserId);
-    private DatabaseReference userRewardsRef = database.getReference("UserRewards").child(currentUserId);
     private String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
     private int currentUserPoints = 0;
+
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+    DatabaseReference rewardsRef = database.getReference("Rewards");
+    DatabaseReference usersRef = database.getReference("Users").child(currentUserId);
+    DatabaseReference userRewardsRef = database.getReference("UserRewards").child(currentUserId);
 
     @Nullable
     @Override
@@ -59,13 +60,19 @@ public class StoreFragment extends Fragment {
         storeAdapter = new StoreAdapter(getContext(), rewardList, new StoreAdapter.OnItemClickListener() {
             @Override
             public void onBuyClick(Reward reward) {
-                // calling the purchase method when button is clicked
-                purchase(reward);
+                SharedPreferences sharedPref = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+                boolean isOwned = sharedPref.getBoolean("owned_" + reward.getRewardId(), false);
+
+                if (isOwned) {
+                    equipReward(reward);
+                    Toast.makeText(getContext(), "Equipped: " + reward.getName(), Toast.LENGTH_SHORT).show();
+                } else {
+                    purchase(reward);
+                }
             }
         });
         recyclerVStore.setAdapter(storeAdapter);
 
-        // loading data
         loadUserPoints();
         loadRewardsFromFirebase();
 
@@ -119,10 +126,9 @@ public class StoreFragment extends Fragment {
             usersRef.child("currentPoints").setValue(newPoints);
 
             // add item to "UserRewards" node with timestamp
-            String purchaseKey = userRewardsRef.push().getKey(); // create unique key
+            String purchaseKey = userRewardsRef.push().getKey();
             String currentDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
 
-            // map for the new purchase entry
             Map<String, Object> purchaseData = new HashMap<>();
             purchaseData.put("rewardId", reward.getRewardId());
             purchaseData.put("purchaseDate", currentDate);
@@ -130,56 +136,41 @@ public class StoreFragment extends Fragment {
             if (purchaseKey != null) {
                 userRewardsRef.child(purchaseKey).setValue(purchaseData);
             }
-            saveRewardLocally(reward.getRewardId());
 
+            SharedPreferences sharedPref = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+            sharedPref.edit().putBoolean("owned_" + reward.getRewardId(), true).apply();
+
+            equipReward(reward);
             Toast.makeText(getContext(), "Purchased: " + reward.getName() + "!", Toast.LENGTH_SHORT).show();
 
-        }
-        else {
+        } else {
             Toast.makeText(getContext(), "Not enough points!", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void saveRewardLocally(String rewardId) {
+    private void equipReward(Reward reward)
+    {
+        String rewardId = reward.getRewardId();
         SharedPreferences sharedPref = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
 
         // themes
-        if (rewardId.equals("r1")) {
-            editor.putString("active_theme", "pink");
-            Log.d("StoreFragment", "theme set to pink");
-        }
-        else if (rewardId.equals("r2")) {
-            editor.putString("active_theme", "dark");
-            Log.d("StoreFragment", "theme set to dark");
-        }
-        else if (rewardId.equals("r4")) {
-            editor.putString("active_theme", "nature");
-            Log.d("StoreFragment", "theme set to nature");
-        }
+        if (rewardId.equals("r1")) editor.putString("active_theme", "pink");
+        else if (rewardId.equals("r2")) editor.putString("active_theme", "dark");
+        else if (rewardId.equals("r4")) editor.putString("active_theme", "nature");
 
         // fonts
-        else if (rewardId.equals("r5")) {
-            // saves font choice
-            editor.putString("active_font", "retro");
-            Log.d("StoreFragment", "font set to retro");
-        }
-        else if (rewardId.equals("r7")) {
-            // saves font choice
-            editor.putString("active_font", "classic");
-            Log.d("StoreFragment", "font set to classic");
-        }
+        else if (rewardId.equals("r5")) editor.putString("active_font", "retro");
+        else if (rewardId.equals("r7")) editor.putString("active_font", "classic");
 
-        // boolean boosters and badges
-        else if (rewardId.equals("r3")) {
-            editor.putBoolean("has_point_booster", true);
-            Log.d("StoreFragment", "booster activated");
-        }
-        else if (rewardId.equals("r6")) {
-            editor.putBoolean("has_golden_badge", true);
-            Log.d("StoreFragment", "golden badge unlocked");
-        }
+        // boosters
+        else if (rewardId.equals("r3")) editor.putBoolean("has_point_booster", true);
+        else if (rewardId.equals("r6")) editor.putBoolean("has_golden_badge", true);
 
         editor.apply();
+
+        if (storeAdapter != null) {
+            storeAdapter.notifyDataSetChanged();
+        }
     }
 }
