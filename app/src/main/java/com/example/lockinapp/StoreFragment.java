@@ -46,6 +46,18 @@ public class StoreFragment extends Fragment {
     DatabaseReference usersRef = database.getReference("Users").child(currentUserId);
     DatabaseReference userRewardsRef = database.getReference("UserRewards").child(currentUserId);
 
+    /**
+     * Initializes the store UI and handles item interaction logic.
+     * <p>
+     * Sets up a 2-column grid for rewards and defines a smart click behavior:
+     * <ul>
+     * <li>If the item is already owned (verified with {@code SharedPreferences}),
+     * it equips the item immediately.</li>
+     * <li>If the item is new, it triggers the {@link #purchase(Reward)} flow.</li>
+     * </ul>
+     *
+     * @return The root view for the Store/Rewards screen.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -74,17 +86,24 @@ public class StoreFragment extends Fragment {
         recyclerVStore.setAdapter(storeAdapter);
 
         loadUserPoints();
-        loadRewardsFromFirebase();
+        loadRewards();
 
         return view;
     }
 
+    /**
+     * Synchronizes the user's total points with the Firebase.
+     * <p>
+     * This method attaches a live listener to the {@code currentPoints} node.
+     * Any changes in the database (e.g., earning points from a session or
+     * spending them in the store) will automatically trigger a UI update
+     * in the {@code tVUserPoints} display.
+     */
     private void loadUserPoints() {
         usersRef.child("currentPoints").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    // getting the integer value safely
                     Integer points = snapshot.getValue(Integer.class);
                     if (points != null) {
                         currentUserPoints = points;
@@ -100,7 +119,14 @@ public class StoreFragment extends Fragment {
         });
     }
 
-    private void loadRewardsFromFirebase() {
+    /**
+     * Loads the available rewards from Firebase and populates the store.
+     * <p>
+     * This method listens for any changes in the rewards inventory.
+     * It clears the current list to prevent duplicates and refreshes the
+     * {@code RecyclerView} so the user always sees the items.
+     */
+    private void loadRewards() {
         rewardsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -119,6 +145,20 @@ public class StoreFragment extends Fragment {
         });
     }
 
+    /**
+     * Processes a reward purchase by validating points and updating the database.
+     * <p>
+     * This method performs a multi-step transaction:
+     * <ul>
+     * <li>Checks if the user has sufficient points.</li>
+     * <li>Deducts the cost and updates the {@code currentPoints} in Firebase.</li>
+     * <li>Records the purchase with a timestamp in the {@code UserRewards} node.</li>
+     * <li>Updates {@code SharedPreferences} to reflect ownership locally.</li>
+     * <li>Automatically triggers {@link #equipReward(Reward)} for immediate use.</li>
+     * </ul>
+     *
+     * @param reward The item the user is attempting to buy.
+     */
     private void purchase(Reward reward) {
         if (currentUserPoints >= reward.getCost()) {
             // user has enough points
@@ -148,6 +188,19 @@ public class StoreFragment extends Fragment {
         }
     }
 
+    /**
+     * Activates a purchased reward and applies its effects to the user's profile.
+     * <p>
+     * Depending on the reward type, this method updates {@code SharedPreferences} to:
+     * <ul>
+     * <li><b>Themes:</b> Switch the app's visual skin (e.g., Pink, Dark, Nature).</li>
+     * <li><b>Fonts:</b> Update the typography style (e.g., Retro, Classic).</li>
+     * <li><b>Boosters:</b> Enable gameplay modifiers like point multipliers or badges.</li>
+     * </ul>
+     * It also refreshes the {@code RecyclerView} to reflect the "Equipped" state visually.
+     *
+     * @param reward The selected reward to be applied.
+     */
     private void equipReward(Reward reward)
     {
         String rewardId = reward.getRewardId();
