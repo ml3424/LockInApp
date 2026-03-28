@@ -21,12 +21,9 @@ import kotlin.coroutines.Continuation;
 import kotlin.coroutines.CoroutineContext;
 import kotlin.coroutines.EmptyCoroutineContext;
 
-
 public class GeminiManager {
     private static GeminiManager instance;
     private GenerativeModel gemini;
-    private final String TAG = "GeminiManager";
-
 
     private GeminiManager() {
         gemini = new GenerativeModel(
@@ -56,7 +53,7 @@ public class GeminiManager {
                     @Override
                     public void resumeWith(@NonNull Object result) {
                         if (result instanceof Result.Failure) {
-                            Log.i(TAG, "Error: " + ((Result.Failure) result).exception.getMessage());
+                            Log.i("GeminiManager", "Error: " + ((Result.Failure) result).exception.getMessage());
                             callback.onFailure(((Result.Failure) result).exception);
                         } else {
                             callback.onSuccess(((GenerateContentResponse) result).getText());
@@ -85,9 +82,10 @@ public class GeminiManager {
                     @Override
                     public void resumeWith(@NonNull Object result) {
                         if (result instanceof Result.Failure) {
-                            Log.i(TAG, "Error: " + ((Result.Failure) result).exception.getMessage());
+                            Log.i("GeminiManager", "Error: " + ((Result.Failure) result).exception.getMessage());
                             callback.onFailure(((Result.Failure) result).exception);
-                        } else {
+                        }
+                        else {
                             callback.onSuccess(((GenerateContentResponse) result).getText());
                         }
                     }
@@ -116,9 +114,10 @@ public class GeminiManager {
                     @Override
                     public void resumeWith(@NonNull Object result) {
                         if (result instanceof Result.Failure) {
-                            Log.i(TAG, "Error: " + ((Result.Failure) result).exception.getMessage());
+                            Log.i("GeminiManager", "Error: " + ((Result.Failure) result).exception.getMessage());
                             callback.onFailure(((Result.Failure) result).exception);
-                        } else {
+                        }
+                        else {
                             callback.onSuccess(((GenerateContentResponse) result).getText());
                         }
                     }
@@ -145,9 +144,10 @@ public class GeminiManager {
                     @Override
                     public void resumeWith(@NonNull Object result) {
                         if (result instanceof Result.Failure) {
-                            Log.i(TAG, "Error: " + ((Result.Failure) result).exception.getMessage());
+                            Log.i("GeminiManager", "Error: " + ((Result.Failure) result).exception.getMessage());
                             callback.onFailure(((Result.Failure) result).exception);
-                        } else {
+                        }
+                        else {
                             callback.onSuccess(((GenerateContentResponse) result).getText());
                         }
                     }
@@ -176,9 +176,10 @@ public class GeminiManager {
                     @Override
                     public void resumeWith(@NonNull Object result) {
                         if (result instanceof Result.Failure) {
-                            Log.i(TAG, "Error: " + ((Result.Failure) result).exception.getMessage());
+                            Log.i("GeminiManager", "Error: " + ((Result.Failure) result).exception.getMessage());
                             callback.onFailure(((Result.Failure) result).exception);
-                        } else {
+                        }
+                        else {
                             callback.onSuccess(((GenerateContentResponse) result).getText());
                         }
                     }

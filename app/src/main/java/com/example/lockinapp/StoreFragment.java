@@ -36,36 +36,25 @@ public class StoreFragment extends Fragment {
     private TextView tVUserPoints;
 
     private StoreAdapter storeAdapter;
-    private List<Reward> rewardList;
+    private List<Reward> rewardList  = new ArrayList<>();;
 
-    // firebase references
-    private DatabaseReference rewardsRef;
-    private DatabaseReference usersRef;
-    private DatabaseReference userRewardsRef;
-
-    private String currentUserId;
+    private FirebaseDatabase database = FirebaseDatabase.getInstance();
+    private DatabaseReference rewardsRef = database.getReference("Rewards");
+    private DatabaseReference usersRef = database.getReference("Users").child(currentUserId);
+    private DatabaseReference userRewardsRef = database.getReference("UserRewards").child(currentUserId);
+    private String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
     private int currentUserPoints = 0;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // inflate the layout for this fragment
         View view = inflater.inflate(R.layout.store_fragment, container, false);
 
-        // initializing views
         recyclerVStore = view.findViewById(R.id.recyclerVStore);
         tVUserPoints = view.findViewById(R.id.tVUserPoints);
 
         // setting up recyclerview with grid layout (2 columns)
         recyclerVStore.setLayoutManager(new GridLayoutManager(getContext(), 2));
-        rewardList = new ArrayList<>();
-
-        // initializing firebase
-        currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        rewardsRef = database.getReference("Rewards");
-        usersRef = database.getReference("Users").child(currentUserId);
-        userRewardsRef = database.getReference("UserRewards").child(currentUserId);
 
         storeAdapter = new StoreAdapter(getContext(), rewardList, new StoreAdapter.OnItemClickListener() {
             @Override
@@ -113,7 +102,7 @@ public class StoreFragment extends Fragment {
                     Reward reward = dataSnapshot.getValue(Reward.class);
                     rewardList.add(reward);
                 }
-                storeAdapter.notifyDataSetChanged(); // notifying adapter to refresh the grid
+                storeAdapter.notifyDataSetChanged();
             }
 
             @Override
