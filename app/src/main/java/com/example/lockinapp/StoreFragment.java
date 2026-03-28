@@ -119,23 +119,40 @@ public class StoreFragment extends Fragment {
         });
     }
 
+
     /**
-     * Loads the available rewards from Firebase and populates the store.
+     * Synchronizes purchased rewards from Firebase to local storage.
      * <p>
-     * This method listens for any changes in the rewards inventory.
-     * It clears the current list to prevent duplicates and refreshes the
-     * {@code RecyclerView} so the user always sees the items.
+     * This method listens to the user's purchase history in the cloud and
+     * updates the local {@code SharedPreferences} with "owned" flags for each
+     * reward ID found.
+     * <p>
+     * If new purchases are detected, it applies the changes locally and
+     * refreshes the {@code StoreAdapter} to update the button states from
+     * "Buy" to "Equip" or "Equipped".
      */
     private void loadRewards() {
         rewardsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                rewardList.clear(); // clearing list to avoid duplicates
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    Reward reward = dataSnapshot.getValue(Reward.class);
-                    rewardList.add(reward);
+                SharedPreferences sharedPref = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPref.edit();
+                boolean hasChanges = false;
+
+                for (DataSnapshot purchaseSnapshot : snapshot.getChildren()) {
+                    String rewardId = purchaseSnapshot.child("rewardId").getValue(String.class);
+                    if (rewardId != null) {
+                        editor.putBoolean("owned_" + rewardId, true);
+                        hasChanges = true;
+                    }
                 }
-                storeAdapter.notifyDataSetChanged();
+
+                if (hasChanges) {
+                    editor.apply();
+                    if (storeAdapter != null) {
+                        storeAdapter.notifyDataSetChanged();
+                    }
+                }
             }
 
             @Override
