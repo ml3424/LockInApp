@@ -19,17 +19,37 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.RewardViewHo
     private List<Reward> rewardList;
     private OnItemClickListener listener;
 
-    // interface to handle clicks in the fragment instead of the adapter
+    /**
+     * Communication bridge between the Adapter and the Fragment.
+     * <p>
+     * This interface allows the Fragment to handle purchase logic,
+     * keeping the Adapter focused purely on data display.
+     */
     public interface OnItemClickListener {
+        /**
+         * Triggered when the user clicks the action button on a reward item.
+         * @param reward The specific reward associated with the clicked item.
+         */
         void onBuyClick(Reward reward);
     }
 
+    /**
+     * Initializes the adapter with reward data and a click listener.
+     * @param context  The fragment context for layout inflation and SharedPreferences.
+     * @param rewardList The list of {@link Reward} objects to display in the store.
+     * @param listener Implementation of the click handler for purchase/equip actions.
+     */
     public StoreAdapter(Context context, List<Reward> rewardList, OnItemClickListener listener) {
         this.context = context;
         this.rewardList = rewardList;
         this.listener = listener;
     }
 
+    /**
+     * Inflates the XML layout for an individual reward item and wraps it in a ViewHolder.
+     * <p>
+     * This is called by the RecyclerView when it needs a new item view to display.
+     */
     @NonNull
     @Override
     public RewardViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -37,11 +57,21 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.RewardViewHo
         return new RewardViewHolder(view);
     }
 
+    /**
+     * Binds reward data to the UI components of a specific item in the grid.
+     * <p>
+     * This method performs several key tasks:
+     * <ul>
+     * <li>Sets the name and point cost text.</li>
+     * <li>Updates the button's appearance (Buy/Equip/Equipped).</li>
+     * <li>Asynchronously loads the reward image from a URL using the Glide library.</li>
+     * <li>Attaches the click listener to the action button.</li>
+     * </ul>
+     */
     @Override
     public void onBindViewHolder(@NonNull RewardViewHolder holder, int position) {
         Reward currentReward = rewardList.get(position);
 
-        // setting text values
         holder.textViewName.setText(currentReward.getName());
         holder.textViewCost.setText(currentReward.getCost() + " Points");
 
@@ -63,6 +93,20 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.RewardViewHo
         });
     }
 
+    /**
+     * Dynamically updates the purchase/equip button based on item ownership and activity.
+     * <p>
+     * This method checks {@code SharedPreferences} to determine the current state
+     * of a reward and applies the following visual logic:
+     * <ul>
+     * <li><b>Equipped:</b> The item is currently active (Disabled, Gray).</li>
+     * <li><b>Equip:</b> The item is owned but not active (Enabled, Orange).</li>
+     * <li><b>Buy:</b> The item is not yet owned (Enabled, Blue).</li>
+     * </ul>
+     *
+     * @param holder   The ViewHolder containing the UI components for the reward item.
+     * @param rewardId The unique identifier of the reward being processed.
+     */
     private void updateButtonState(RewardViewHolder holder, String rewardId) {
         SharedPreferences sharedPref = context.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         boolean isOwned = sharedPref.getBoolean("owned_" + rewardId, false);
@@ -93,14 +137,28 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.RewardViewHo
         }
     }
 
+    /**
+     * Returns the total number of items in the reward list.
+     * <p>
+     * This tells the {@code RecyclerView} how many rows or grid cells
+     * it needs to prepare for display.
+     *
+     * @return The size of the {@code rewardList}.
+     */
     @Override
     public int getItemCount() {
         return rewardList.size();
     }
 
-    // inner class to hold the views for efficient scrolling
+    /**
+     * A container for the UI components of a single reward item.
+     * <p>
+     * The {@code ViewHolder} pattern is used to "cache" references to the
+     * views (TextViews, ImageView, Button). This avoids repeated calls to
+     * {@code findViewById}, which significantly improves scrolling performance
+     * and reduces battery consumption.
+     */
     public static class RewardViewHolder extends RecyclerView.ViewHolder {
-
         TextView textViewName, textViewCost;
         ImageView imageViewReward;
         Button buttonBuy;
