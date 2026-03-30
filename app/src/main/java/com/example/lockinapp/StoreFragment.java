@@ -164,7 +164,15 @@ public class StoreFragment extends Fragment {
     }
 
     /**
-     * Fetches the store catalog from Firebase and displays it in the RecyclerView.
+     * Fetches the global list of available rewards from the database.
+     * <p>
+     * This method synchronizes the UI with the master catalog in Firebase.
+     * It clears the local list to ensure fresh data and triggers a
+     * {@code notifyDataSetChanged()} to refresh the grid layout once the
+     * data is received.
+     * <p>
+     * Note: While this method loads metadata (names, prices), the actual
+     * images are managed and cached by the Glide library in the adapter.
      */
     private void fetchStoreCatalog() {
         rewardsRef.addValueEventListener(new ValueEventListener() {
@@ -178,8 +186,6 @@ public class StoreFragment extends Fragment {
                         rewardList.add(reward);
                     }
                 }
-
-                Log.d("StoreFragment", "Loaded " + rewardList.size() + " rewards from Firebase");
 
                 if (storeAdapter != null) {
                     storeAdapter.notifyDataSetChanged();
@@ -266,7 +272,7 @@ public class StoreFragment extends Fragment {
 
         // boosters
         else if (rewardId.equals("r3")) editor.putBoolean("has_point_booster", true);
-        else if (rewardId.equals("r6")) editor.putBoolean("has_golden_badge", true);
+        //else if (rewardId.equals("r6")) editor.putBoolean("has_golden_badge", true);
 
         editor.apply();
 

@@ -32,6 +32,7 @@ import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -45,7 +46,7 @@ import androidx.fragment.app.Fragment;
 public class StudyFragment extends Fragment implements AdapterView.OnItemSelectedListener{
 
     private SeekBar seekBarTime;
-    private TextView tvSelectedTime;
+    private TextView tvSelectedTime, tVTitle1, tVTitle2;
     private ImageView ivGoldenBadge;
     private Button btnToggleTimer, btnLogOut;
     private Spinner spinnerSubjects;
@@ -115,6 +116,8 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
 
         seekBarTime = view.findViewById(R.id.seekBarTime);
         tvSelectedTime = view.findViewById(R.id.tvSelectedTime);
+        tVTitle1 = view.findViewById(R.id.tVTitle1);
+        tVTitle2 = view.findViewById(R.id.tVTitle2);
         ivGoldenBadge = view.findViewById(R.id.ivGoldenBadge);
         btnToggleTimer = view.findViewById(R.id.btnToggleTimer);
         btnLogOut = view.findViewById(R.id.btnLogOut);
@@ -478,18 +481,26 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
             // reset to default
             mainLayout.setBackgroundColor(Color.WHITE);
             tvSelectedTime.setTextColor(Color.BLACK);
+            tVTitle1.setTextColor(Color.BLACK);
+            tVTitle2.setTextColor(Color.BLACK);
 
             if (activeTheme.equals("dark")) {
                 mainLayout.setBackgroundColor(Color.parseColor("#212121")); // dark gray
                 tvSelectedTime.setTextColor(Color.WHITE);
+                tVTitle1.setTextColor(Color.WHITE);
+                tVTitle2.setTextColor(Color.WHITE);
             }
             else if (activeTheme.equals("pink")) {
                 mainLayout.setBackgroundColor(Color.parseColor("#F8BBD0")); // light pink
                 tvSelectedTime.setTextColor(Color.parseColor("#880E4F")); // dark pink text
+                tVTitle1.setTextColor(Color.parseColor("#880E4F"));
+                tVTitle2.setTextColor(Color.parseColor("#880E4F"));
             }
             else if (activeTheme.equals("nature")) {
                 mainLayout.setBackgroundColor(Color.parseColor("#C8E6C9")); // light green
                 tvSelectedTime.setTextColor(Color.parseColor("#1B5E20")); // dark green text
+                tVTitle1.setTextColor(Color.parseColor("#1B5E20"));
+                tVTitle2.setTextColor(Color.parseColor("#1B5E20"));
             }
         }
 
@@ -497,22 +508,30 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
 
         if (activeFont.equals("retro")) {
             tvSelectedTime.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
+            tVTitle1.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
+            tVTitle2.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
         }
         else if (activeFont.equals("classic")) {
             tvSelectedTime.setTypeface(Typeface.SERIF, Typeface.BOLD);
+            tVTitle1.setTypeface(Typeface.SERIF, Typeface.BOLD);
+            tVTitle2.setTypeface(Typeface.SERIF, Typeface.BOLD);
         }
         else {
             // default font
             tvSelectedTime.setTypeface(Typeface.DEFAULT_BOLD);
         }
 
-        boolean hasBadge = sharedPref.getBoolean("has_golden_badge", false);
+        boolean hasBadge = sharedPref.getBoolean("owned_r6", false);
         if (hasBadge && ivGoldenBadge != null) {
             // if purchased, show the image on screen
             ivGoldenBadge.setVisibility(View.VISIBLE);
+            Glide.with(requireContext())
+                    .load("https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/1st%20place%20medal/3D/1st_place_medal_3d.png")
+                    .into(ivGoldenBadge);
+
         }
         else if (ivGoldenBadge != null) {
-            ivGoldenBadge.setVisibility(View.GONE);
+            ivGoldenBadge.setVisibility(View.INVISIBLE);
         }
     }
 
