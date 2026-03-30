@@ -51,14 +51,14 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
     private Button btnToggleTimer, btnLogOut;
     private Spinner spinnerSubjects;
     private PreviewView cameraPreview; // XML view needed for camera
-    private View mainLayout;
+    private View mainLayout, bottomNav;
 
     private StudyCameraManager cameraManager;
 
     private String currentUserId;
     private String selectedSubject = "";
     private boolean isTimerRunning = false;
-    private int selectedMinutes = 0;
+    private int selectedMinutes = 1;
 
     /**
      * Launcher to handle the runtime camera permission request.
@@ -103,6 +103,8 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
      * <p>
      * During the inflation process, the XML layout is converted into a View object.
      * This method also sets up the camera manager, permissions, and UI listeners for the study session.
+     * Intercepts the device's physical back button.
+     * Prevents the user from leaving the StudyFragment while an active timer is running.
      *
      * @param inflater The LayoutInflater object to inflate views in the fragment.
      * @param container The parent view that the fragment's UI should be attached to.
@@ -124,6 +126,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         spinnerSubjects = view.findViewById(R.id.spinnerSubjects);
         cameraPreview = view.findViewById(R.id.cameraPreview);
         mainLayout = view.findViewById(R.id.main);
+        bottomNav = requireActivity().findViewById(R.id.bottom_navigation);
 
         currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
@@ -136,15 +139,35 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         setupButtons();
         applyUserPreferences();
 
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (isTimerRunning) {
+                    Toast.makeText(requireContext(), "You are locked in! Finish studying first. 🔒", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    setEnabled(false);
+                    requireActivity().onBackPressed();
+                }
+            }
+        });
+
         return view;
     }
 
     /**
-     * Resumes fragment operations, synchronizes timer state, and registers receivers.
+     * Resynchronizes the UI and background services when the Fragment returns to the foreground.
      * <p>
-     * This method checks SharedPreferences to see if a background timer has expired
-     * while the app was inactive. If active, it restores the broadcast receiver
-     * for live updates and resumes camera monitoring.
+     * This method performs a critical "catch-up" check:
+     * <ul>
+     * <li><b>Time Sync:</b> Compares the current system time with the saved {@code expectedEndTime}.
+     * If the time has already passed, it cleans up the session immediately.</li>
+     * <li><b>UI Restoration:</b> If the timer is still active, it locks the UI (buttons and seekbar)
+     * to prevent inconsistent state changes.</li>
+     * <li><b>Broadcast Setup:</b> Re-registers the {@code LocalBroadcastManager} to start
+     * receiving live "Tick" updates and "Finished" signals from the background Service.</li>
+     * <li><b>Sensor Resume:</b> Restarts the camera monitoring.</li>
+     * </ul>
      */
     @Override
     public void onResume() {
@@ -154,10 +177,18 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
 
         if (timerWasRunning) {
             long expectedEndTime = prefs.getLong("expected_end_time", 0);
+
             if (System.currentTimeMillis() >= expectedEndTime) {
                 prefs.edit().putBoolean("is_timer_running_bg", false).apply();
                 handleStudySessionEnd();
                 return;
+            }
+            else {
+                isTimerRunning = true;
+                btnToggleTimer.setText("Stop Timer");
+                seekBarTime.setEnabled(false);
+                btnLogOut.setEnabled(false);
+                bottomNav.setVisibility(View.GONE);
             }
         }
 
@@ -186,19 +217,6 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
 
         if (cameraManager != null) {
             cameraManager.pauseCaptures();
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        if (isTimerRunning) {
-            stopTimer();
-            saveSessionToFirebase();
-
-            SharedPreferences prefs = requireContext().getSharedPreferences("UserPrefs", MODE_PRIVATE);
-            prefs.edit().putBoolean("show_feedback_on_return", true).apply();
         }
     }
 
@@ -290,14 +308,10 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
     /**
      * Saves study session end time, initiates the study session timer and background monitoring.
      * <p>
-     * This method disables navigation controls, starts the {@code TimerService} with
+     * This method disables navigation controls and hides the bottom bar, starts the {@code TimerService} with
      * the selected duration, and starts camera manager to begin focus tracking.
      */
     private void startTimer() {
-        // debug:
-        // navigateToFeedback("0", 0, 0);
-        // TODO: remove that
-
         if (selectedMinutes > 0)
         {
             // save end time and that the timer is running
@@ -310,6 +324,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
                     .apply();
 
             btnLogOut.setEnabled(false);
+            bottomNav.setVisibility(View.GONE);
 
             Intent serviceIntent = new Intent(requireContext(), TimerService.class);
             serviceIntent.putExtra("DURATION_MIN", selectedMinutes);
@@ -564,7 +579,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
     /**
      * Resets the UI components to their initial state after a session ends or stopped.
      * <p>
-     * Re-enables the SeekBar and logout button, resets the timer toggle text,
+     * Re-enables the SeekBar and logout button. Restores the bottom navigation bar, resets the timer toggle text,
      * and clears the displayed time.
      */
     private void resetUITimer() {
@@ -574,7 +589,8 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         btnLogOut.setEnabled(true);
 
         seekBarTime.setEnabled(true); // unlock seekbar
-        tvSelectedTime.setText("1");
+        tvSelectedTime.setText("set time with the bar");
+        bottomNav.setVisibility(View.VISIBLE);
     }
 
     /**
