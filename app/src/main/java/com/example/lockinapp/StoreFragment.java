@@ -86,7 +86,8 @@ public class StoreFragment extends Fragment {
         recyclerVStore.setAdapter(storeAdapter);
 
         loadUserPoints();
-        loadRewards();
+        fetchStoreCatalog();
+        loadPurchases();
 
         return view;
     }
@@ -131,8 +132,8 @@ public class StoreFragment extends Fragment {
      * refreshes the {@code StoreAdapter} to update the button states from
      * "Buy" to "Equip" or "Equipped".
      */
-    private void loadRewards() {
-        rewardsRef.addValueEventListener(new ValueEventListener() {
+    private void loadPurchases() {
+        userRewardsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 SharedPreferences sharedPref = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
@@ -158,6 +159,36 @@ public class StoreFragment extends Fragment {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(getContext(), "Failed to load store", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /**
+     * Fetches the store catalog from Firebase and displays it in the RecyclerView.
+     */
+    private void fetchStoreCatalog() {
+        rewardsRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                rewardList.clear();
+
+                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                    Reward reward = childSnapshot.getValue(Reward.class);
+                    if (reward != null) {
+                        rewardList.add(reward);
+                    }
+                }
+
+                Log.d("StoreFragment", "Loaded " + rewardList.size() + " rewards from Firebase");
+
+                if (storeAdapter != null) {
+                    storeAdapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("StoreFragment", "Error fetching catalog", error.toException());
             }
         });
     }
