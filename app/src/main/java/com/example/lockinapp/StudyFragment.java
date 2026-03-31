@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -335,7 +336,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
     public void onNothingSelected(AdapterView<?> parent) {}
 
     /**
-     * Saves study session end time, initiates the study session timer and background monitoring.
+     * Saves study session end time, initiates the study session timer, background monitoring and the screen will be on.
      * <p>
      * This method disables navigation controls and hides the bottom bar, starts the {@code TimerService} with
      * the selected duration, and starts camera manager to begin focus tracking.
@@ -343,6 +344,8 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
     private void startTimer() {
         if (selectedMinutes > 0)
         {
+            requireActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
             // save end time and that the timer is running
             // so if the user leave the app and the session finished, the app will show the end of the session
             long expectedEndTime = System.currentTimeMillis() + ((long) selectedMinutes * 60 * 1000);
@@ -372,9 +375,11 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
      * Manually ends the current study session.
      * <p>
      * Stops the {@code TimerService}, stops background camera captures,
-     * and resets the UI.
+     * stops to force screen to be on and resets the UI.
      */
     private void stopTimer() {
+        requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         SharedPreferences prefs = requireContext().getSharedPreferences("UserPrefs", MODE_PRIVATE);
         prefs.edit().putBoolean("is_timer_running_bg", false).apply();
 
