@@ -104,6 +104,8 @@ public class StoreFragment extends Fragment {
         usersRef.child("currentPoints").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!isAdded() || getContext() == null) return;
+
                 if (snapshot.exists()) {
                     Integer points = snapshot.getValue(Integer.class);
                     if (points != null) {
@@ -136,6 +138,8 @@ public class StoreFragment extends Fragment {
         userRewardsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!isAdded() || getContext() == null) return;
+
                 SharedPreferences sharedPref = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPref.edit();
                 boolean hasChanges = false;
@@ -178,6 +182,7 @@ public class StoreFragment extends Fragment {
         rewardsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!isAdded() || getContext() == null) return;
                 rewardList.clear();
 
                 for (DataSnapshot childSnapshot : snapshot.getChildren()) {

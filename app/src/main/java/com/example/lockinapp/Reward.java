@@ -10,28 +10,9 @@ public class Reward {
     /** Default constructor required for Firebase Realtime Database/Firestore. */
     public Reward() {}
 
-    /**
-     * Initializes a new Reward item.
-     * @param rewardId Unique identifier for the item.
-     * @param name Display name of the reward.
-     * @param cost Points required to unlock.
-     * @param description Brief text explaining the reward.
-     * @param imageUrl URL for the item's icon or image.
-     */
-    public Reward(String rewardId, String name, int cost, String description, String imageUrl) {
-        this.rewardId = rewardId;
-        this.name = name;
-        this.cost = cost;
-        this.description = description;
-        this.imageUrl = imageUrl;
-    }
 
     public String getRewardId() {
         return rewardId;
-    }
-
-    public void setRewardId(String rewardId) {
-        this.rewardId = rewardId;
     }
 
     public String getName() {
@@ -46,23 +27,8 @@ public class Reward {
         return cost;
     }
 
-    public void setCost(int cost) {
-        this.cost = cost;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getImageUrl() {
         return imageUrl;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
 }
