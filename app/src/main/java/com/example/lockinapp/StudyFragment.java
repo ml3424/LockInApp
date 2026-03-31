@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -217,6 +218,21 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
 
         if (cameraManager != null) {
             cameraManager.pauseCaptures();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if (isTimerRunning) {
+            PowerManager pm = (PowerManager) requireContext().getSystemService(Context.POWER_SERVICE);
+            boolean isScreenOn = pm != null && pm.isInteractive();
+
+            if (isScreenOn) {
+                Intent intent = new Intent("TRIGGER_DISTRACTION");
+                LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(intent);
+            }
         }
     }
 

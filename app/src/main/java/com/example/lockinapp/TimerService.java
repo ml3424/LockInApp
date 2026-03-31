@@ -4,8 +4,10 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -33,6 +35,15 @@ public class TimerService extends Service implements SensorEventListener {
     private boolean isDistracted = false;
     private String cameraId;
 
+    private BroadcastReceiver distractionReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if ("TRIGGER_DISTRACTION".equals(intent.getAction())) {
+                startDistractionAlert();
+            }
+        }
+    };
+
     /**
      * Initializes the service and its hardware components.
      * <p>
@@ -45,10 +56,13 @@ public class TimerService extends Service implements SensorEventListener {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(distractionReceiver, new IntentFilter("TRIGGER_DISTRACTION"));
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+
 
         try
         {
@@ -74,6 +88,7 @@ public class TimerService extends Service implements SensorEventListener {
     @Override
     public void onDestroy() {
         sensorManager.unregisterListener(this);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(distractionReceiver);
 
         if (countDownTimer != null) {
             countDownTimer.cancel();
@@ -99,7 +114,7 @@ public class TimerService extends Service implements SensorEventListener {
             // calculate the total acceleration force = a in physics
             double acceleration = Math.sqrt(x*x + y*y + z*z);
 
-            if (acceleration > 15) { // 15 is a threshold for significant movement
+            if (acceleration > 13) { // 13 is a threshold for significant movement
                 Log.d("Distraction", "Acceleration detected: " + acceleration);
                 startDistractionAlert();
             }
