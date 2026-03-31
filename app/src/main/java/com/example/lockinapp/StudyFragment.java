@@ -603,8 +603,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         // update shared preferences to stop auto-login
         SharedPreferences sP = requireActivity().getSharedPreferences("stay_logged_in", MODE_PRIVATE);
         SharedPreferences.Editor editor = sP.edit();
-        editor.putBoolean("stayConnected", false);
-        editor.apply();
+        editor.clear().apply();
 
         FirebaseAuth.getInstance().signOut();
 

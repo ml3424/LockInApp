@@ -235,7 +235,7 @@ public class StudyCameraManager {
      * @param bitmap The processed image frame to be analyzed.
      */
     private void sendToGemini(Bitmap bitmap) {
-        String prompt = "Analyze the person's face. Estimate concentration level (0-100). Return ONLY the number. if the face is not shown return 101";
+        String prompt = "Analyze the person's face. Estimate concentration level (0-100). Return ONLY the number. important: if the face is not shown return 101";
 
         GeminiManager.getInstance().sendTextWithPhotoPrompt(prompt, bitmap, new GeminiCallBack() {
             @Override
@@ -251,7 +251,6 @@ public class StudyCameraManager {
                         }
                         else
                         {
-                            // since this callback may run on a background thread, used a Handler to put the Toast task back to the UI thread.
                             new Handler(Looper.getMainLooper()).post(new Runnable() {
                                 @Override
                                 public void run() {

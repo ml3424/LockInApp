@@ -73,7 +73,7 @@
                 android:layout_height="match_parent"
                 android:fontFamily="@font/actor"
                 android:gravity="center"
-                android:text="Your score for this session : "
+                android:text="Your ai score for this session : "
                 android:textSize="22sp" />
 
             <TextView

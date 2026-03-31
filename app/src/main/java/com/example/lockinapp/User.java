@@ -26,38 +26,4 @@ public class User {
         this.extraSubjects = new ArrayList<>();
         extraSubjects.add("extra"); // for not removing the empty header in firebase
     }
-
-    // Getters
-    public String getUserId() {
-        return userId;
-    }
-    public int getCurrentPoints() {
-        return currentPoints;
-    }
-    public int getTotalStudyTime() {
-        return totalStudyTime;
-    }
-    public String getDisplayName() {
-        return displayName;
-    }
-    public List<String> getExtraSubjects() {
-        return extraSubjects;
-    }
-
-    // Setters
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-    public void setCurrentPoints(int currentPoints) {
-        this.currentPoints = currentPoints;
-    }
-    public void setTotalStudyTime(int totalStudyTime) {
-        this.totalStudyTime = totalStudyTime;
-    }
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-    public void setExtraSubjects(List<String> extraSubjects) {
-        this.extraSubjects = extraSubjects;
-    }
 }
