@@ -35,6 +35,12 @@ public class TimerService extends Service implements SensorEventListener {
     private boolean isDistracted = false;
     private String cameraId;
 
+    /**
+     * Listener for distraction events triggered by external components.
+     * <p>
+     * When a {@code "TRIGGER_DISTRACTION"} broadcast is received, it initiates
+     * the {@link #startDistractionAlert()} flow to bring the user's focus back.
+     */
     private BroadcastReceiver distractionReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -45,13 +51,16 @@ public class TimerService extends Service implements SensorEventListener {
     };
 
     /**
-     * Initializes the service and its hardware components.
+     * Initializes the service and its hardware integration layer.
      * <p>
-     * This method sets up the {@code SensorManager} for motion detection,
-     * the {@code Vibrator} for haptic feedback.
-     * <p>
-     * It also registers a listener for the accelerometer to monitor device
-     * movement during the study session.
+     * This method sets up the physical monitoring tools:
+     * <ul>
+     * <li><b>Movement:</b> Initializes the Accelerometer to detect if the phone is picked up.</li>
+     * <li><b>Feedback:</b> Sets up the {@code Vibrator} and identifies the primary
+     * camera ID to control the LED flash for alerts.</li>
+     * <li><b>Communication:</b> Registers a local receiver to respond to
+     * distraction signals without freezing the main process.</li>
+     * </ul>
      */
     @Override
     public void onCreate() {
@@ -81,7 +90,8 @@ public class TimerService extends Service implements SensorEventListener {
     /**
      * Performs cleanup before the service is destroyed.
      * <p>
-     * This ensures that the accelerometer listener is unregistered to save battery
+     * This ensures that the accelerometer listener is unregistered to save battery,
+     * unregisters the broadcast receiver
      * and that any active {@code CountDownTimer} is cancelled to prevent
      * memory leaks or background crashes.
      */

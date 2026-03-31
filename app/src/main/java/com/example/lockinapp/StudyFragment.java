@@ -221,6 +221,19 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         }
     }
 
+    /**
+     * Detects app backgrounding and triggers distraction alerts if necessary.
+     * <p>
+     * This method acts as a "focus guard." When the fragment is no longer visible:
+     * <ul>
+     * <li><b>Context Check:</b> It identifies if the user navigated away while the
+     * screen is still active (indicating a potential distraction/app switch).</li>
+     * <li><b>Alert Trigger:</b> If the timer is running and the screen is ON, it
+     * broadcasts a {@code TRIGGER_DISTRACTION} signal to the service.</li>
+     * <li><b>Screen Off Exception:</b> If the screen is locked/off, no alert is
+     * triggered, allowing the user to study with the screen turned off.</li>
+     * </ul>
+     */
     @Override
     public void onStop() {
         super.onStop();
