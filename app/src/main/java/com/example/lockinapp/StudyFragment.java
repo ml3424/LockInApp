@@ -191,6 +191,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
                 seekBarTime.setEnabled(false);
                 btnLogOut.setEnabled(false);
                 bottomNav.setVisibility(View.GONE);
+                mainLayout.setKeepScreenOn(true);
             }
         }
 
@@ -344,7 +345,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
     private void startTimer() {
         if (selectedMinutes > 0)
         {
-            requireActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            mainLayout.setKeepScreenOn(true);
 
             // save end time and that the timer is running
             // so if the user leave the app and the session finished, the app will show the end of the session
@@ -378,8 +379,6 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
      * stops to force screen to be on and resets the UI.
      */
     private void stopTimer() {
-        requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
         SharedPreferences prefs = requireContext().getSharedPreferences("UserPrefs", MODE_PRIVATE);
         prefs.edit().putBoolean("is_timer_running_bg", false).apply();
 
@@ -621,6 +620,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         btnToggleTimer.setText("Start!");
         btnToggleTimer.setVisibility(View.VISIBLE);
         btnLogOut.setEnabled(true);
+        mainLayout.setKeepScreenOn(false);
 
         seekBarTime.setEnabled(true); // unlock seekbar
         tvSelectedTime.setText("set time with the bar");
