@@ -82,7 +82,7 @@
                 android:layout_height="match_parent"
                 android:background="@android:drawable/editbox_background"
                 android:gravity="center"
-                android:text="85"
+                android:text="0"
                 android:textSize="22sp" />
         </LinearLayout>
 

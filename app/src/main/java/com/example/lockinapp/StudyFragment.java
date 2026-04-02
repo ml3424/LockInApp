@@ -472,7 +472,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
                             updateUserGlobalPoints(userRef, points, durationSeconds);
 
                             Toast.makeText(requireContext(), "Session saved! You earned " + points + " points", Toast.LENGTH_LONG).show();
-                            navigateToFeedback(sessionId, aiScore, selectedMinutes);
+                            navigateToFeedback(aiScore, selectedMinutes);
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -588,17 +588,15 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
      * <p>
      * Ensures the current fragment is attached before performing the transaction
      * and adds the transition to the back stack to allow user navigation.
-     * @param sessionId Unique ID of the saved session.
      * @param score The points calculated for the session.
      * @param durationMin The total duration of the session in minutes.
      */
-    private void navigateToFeedback(String sessionId, int score, int durationMin) {
+    private void navigateToFeedback(int score, int durationMin) {
         SessionFeedbackFragment feedbackFrag = new SessionFeedbackFragment();
         Bundle args = new Bundle();
 
-        args.putString("SESSION_ID", sessionId);
         args.putInt("SCORE", score);
-        args.putLong("DURATION_MIN", (long) durationMin);
+        args.putInt("DURATION_MIN", durationMin);
         feedbackFrag.setArguments(args);
 
         if (isAdded()) { // ensure fragment is still attached to activity

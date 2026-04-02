@@ -20,7 +20,6 @@ public class SessionFeedbackFragment extends Fragment {
     private Button btnSendFeedback, btnBack;
 
     private GeminiManager geminiManager;
-    private String sessionId;
     private int sessionScore;
     private long sessionDurationMin;
 
@@ -49,9 +48,8 @@ public class SessionFeedbackFragment extends Fragment {
 
         // retrieve data passed from study fragment
         if (getArguments() != null) {
-            sessionId = getArguments().getString("SESSION_ID");
             sessionScore = getArguments().getInt("SCORE", 0);
-            sessionDurationMin = getArguments().getLong("DURATION_MIN", 0);
+            sessionDurationMin = getArguments().getInt("DURATION_MIN", 0);
 
             tvFeedbackScore.setText(String.valueOf(sessionScore));
         }

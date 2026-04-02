@@ -140,8 +140,8 @@ public class StudyCameraManager {
                 }
             }
         };
-        // First capture after 10 seconds
-        randomCaptureHandler.postDelayed(randomCaptureRunnable, 10000);
+        // First capture after 15 seconds
+        randomCaptureHandler.postDelayed(randomCaptureRunnable, 15000);
     }
 
     /**
@@ -255,8 +255,10 @@ public class StudyCameraManager {
                                 @Override
                                 public void run() {
                                     Toast.makeText(context, "Please make sure your face is shown!", Toast.LENGTH_LONG).show();
+                                    Log.d("CameraManager", "Face was not shown ");
                                 }
-                            });                        }
+                            });
+                        }
                     }
                 }
                 catch (Exception e) {
