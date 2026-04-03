@@ -140,14 +140,14 @@ public class StatsFragment extends Fragment {
         java.util.Map<String, Integer> dateMap = new java.util.TreeMap<>();
 
         for (StudySession s : allSessions) {
-            if (selectedSubject.equals("General") || s.subject.equals(selectedSubject)) {
-                totalSeconds += s.durationSeconds;
-                totalConcentration += s.aiConcentrationScore;
+            if (selectedSubject.equals("General") || s.getSubject().equals(selectedSubject)) {
+                totalSeconds += s.getDurationSeconds();
+                totalConcentration += s.getAiConcentrationScore();
                 count++;
 
                 // extract date only (yyyy-MM-dd)
-                String date = s.startTime.split(" ")[0];
-                float minutes = s.durationSeconds / 60f;
+                String date = s.getStartTime().split(" ")[0];
+                float minutes = s.getDurationSeconds() / 60f;
 
                 if (dateMap.containsKey(date)) {
                     dateMap.put(date, dateMap.get(date) + (int)minutes);

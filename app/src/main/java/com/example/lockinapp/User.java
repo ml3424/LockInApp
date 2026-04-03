@@ -26,4 +26,46 @@ public class User {
         this.extraSubjects = new ArrayList<>();
         extraSubjects.add("extra"); // for not removing the empty header in firebase
     }
+
+    // --- Getters and Setters ---
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public int getCurrentPoints() {
+        return currentPoints;
+    }
+
+    public void setCurrentPoints(int currentPoints) {
+        this.currentPoints = currentPoints;
+    }
+
+    public int getTotalStudyTime() {
+        return totalStudyTime;
+    }
+
+    public void setTotalStudyTime(int totalStudyTime) {
+        this.totalStudyTime = totalStudyTime;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public List<String> getExtraSubjects() {
+        return extraSubjects;
+    }
+
+    public void setExtraSubjects(List<String> extraSubjects) {
+        this.extraSubjects = extraSubjects;
+    }
 }

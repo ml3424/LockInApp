@@ -1,13 +1,13 @@
 package com.example.lockinapp;
 
 public class StudySession {
-    public String sessionId; // unique id for the session
-    public String userId;
-    public String subject;
-    public String startTime;
-    public long durationSeconds;
-    public int aiConcentrationScore;
-    public int pointsEarned;
+    private String sessionId; // unique id for the session
+    private String userId;
+    private String subject;
+    private String startTime;
+    private long durationSeconds;
+    private int aiConcentrationScore;
+    private int pointsEarned;
 
     /** Default constructor required for Firebase Database serialization. */
     public StudySession() {}
@@ -30,6 +30,64 @@ public class StudySession {
         this.startTime = startTime;
         this.durationSeconds = durationSeconds;
         this.aiConcentrationScore = aiConcentrationScore;
+        this.pointsEarned = pointsEarned;
+    }
+
+    // --- Getters and Setters ---
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public long getDurationSeconds() {
+        return durationSeconds;
+    }
+
+    public void setDurationSeconds(long durationSeconds) {
+        this.durationSeconds = durationSeconds;
+    }
+
+    public int getAiConcentrationScore() {
+        return aiConcentrationScore;
+    }
+
+    public void setAiConcentrationScore(int aiConcentrationScore) {
+        this.aiConcentrationScore = aiConcentrationScore;
+    }
+
+    public int getPointsEarned() {
+        return pointsEarned;
+    }
+
+    public void setPointsEarned(int pointsEarned) {
         this.pointsEarned = pointsEarned;
     }
 }

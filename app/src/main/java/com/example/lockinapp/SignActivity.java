@@ -112,6 +112,9 @@ public class SignActivity extends AppCompatActivity {
 
                                                 goToMainActivity(userId);
                                             }
+                                            else {
+                                                Toast.makeText(SignActivity.this, "DB Error: " + dbTask.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                            }
                                         }
                                     });
 
@@ -156,7 +159,8 @@ public class SignActivity extends AppCompatActivity {
                             String userId = mFirebaseAuth.getCurrentUser().getUid();
 
                             goToMainActivity(userId);
-                        } else {
+                        }
+                        else {
                             Toast.makeText(SignActivity.this, "Login failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                         }
                     }

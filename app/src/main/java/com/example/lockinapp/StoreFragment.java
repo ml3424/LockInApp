@@ -41,10 +41,10 @@ public class StoreFragment extends Fragment {
     private String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
     private int currentUserPoints = 0;
 
-    FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference rewardsRef = database.getReference("Rewards");
-    DatabaseReference usersRef = database.getReference("Users").child(currentUserId);
-    DatabaseReference userRewardsRef = database.getReference("UserRewards").child(currentUserId);
+    private FirebaseDatabase database = FirebaseDatabase.getInstance();
+    private DatabaseReference rewardsRef = database.getReference("Rewards");
+    private DatabaseReference usersRef = database.getReference("Users").child(currentUserId);
+    private DatabaseReference userRewardsRef = database.getReference("UserRewards").child(currentUserId);
 
     /**
      * Initializes the store UI and handles item interaction logic.
