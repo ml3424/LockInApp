@@ -413,7 +413,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
      */
     private int calcSessionScore() {
         int aiScore = cameraManager.getAverageScore();
-        int pointsEarned = selectedMinutes * 10; // Base: 10 pts/min
+        int pointsEarned = selectedMinutes;
 
         // Apply AI focus multiplier
         if (aiScore > 80) pointsEarned *= 1.2;
