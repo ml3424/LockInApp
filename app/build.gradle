@@ -39,8 +39,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 }
 
@@ -65,4 +65,24 @@ dependencies {
     implementation "androidx.camera:camera-camera2:${camerax_version}"
     implementation "androidx.camera:camera-lifecycle:${camerax_version}"
     implementation "androidx.camera:camera-view:${camerax_version}"
+}
+
+tasks.register('generateJavadoc', Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+
+    classpath += project.files(android.getBootClasspath())
+
+    android.applicationVariants.all { variant ->
+        if (variant.name == 'debug') {
+            classpath += variant.javaCompileProvider.get().classpath
+        }
+    }
+
+    destinationDir = file("${project.buildDir}/javadoc")
+    failOnError false
+    options.encoding = "UTF-8"
+
+    options.addStringOption('Xdoclint:none', '-quiet')
+
+    doNotTrackState("Ignoring classpath state tracking issues")
 }
