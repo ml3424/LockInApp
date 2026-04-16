@@ -1,4 +1,4 @@
-package com.example.lockinapp;
+package com.example.lockinapp.Adapters;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -11,6 +11,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide; // library for loading images from url
+import com.example.lockinapp.Objects.Reward;
+import com.example.lockinapp.R;
+
 import java.util.List;
 
 public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.RewardViewHolder> {

@@ -1,4 +1,4 @@
-package com.example.lockinapp;
+package com.example.lockinapp.Broadcasts;
 
 import android.app.Notification;
 import android.app.NotificationChannel;

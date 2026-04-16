@@ -1,4 +1,4 @@
-package com.example.lockinapp;
+package com.example.lockinapp.Objects;
 
 public class Reward {
     private String rewardId;

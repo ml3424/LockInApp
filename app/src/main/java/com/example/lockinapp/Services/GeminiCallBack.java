@@ -1,4 +1,4 @@
-package com.example.lockinapp;
+package com.example.lockinapp.Services;
 
 public interface GeminiCallBack {
     /**

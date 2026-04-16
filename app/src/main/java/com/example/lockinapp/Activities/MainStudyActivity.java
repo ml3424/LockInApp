@@ -1,4 +1,4 @@
-package com.example.lockinapp;
+package com.example.lockinapp.Activities;
 
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -7,6 +7,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.example.lockinapp.R;
+import com.example.lockinapp.Fragments.StatsFragment;
+import com.example.lockinapp.Fragments.StoreFragment;
+import com.example.lockinapp.Fragments.StudyFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 

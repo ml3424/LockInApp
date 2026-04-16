@@ -1,4 +1,4 @@
-package com.example.lockinapp;
+package com.example.lockinapp.Fragments;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -17,7 +17,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -35,6 +34,11 @@ import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.bumptech.glide.Glide;
+import com.example.lockinapp.Activities.SignActivity;
+import com.example.lockinapp.R;
+import com.example.lockinapp.Services.StudyCameraManager;
+import com.example.lockinapp.Objects.StudySession;
+import com.example.lockinapp.Broadcasts.TimerService;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;

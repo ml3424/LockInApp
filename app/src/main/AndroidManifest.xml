@@ -25,7 +25,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LockInApp">
         <activity
-            android:name=".SignActivity"
+            android:name=".Activities.SignActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,9 +33,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainStudyActivity"/>
+        <activity android:name=".Activities.MainStudyActivity"/>
         <service
-            android:name=".TimerService"
+            android:name=".Broadcasts.TimerService"
             android:foregroundServiceType="specialUse"
             android:enabled="true"
             android:exported="false" />

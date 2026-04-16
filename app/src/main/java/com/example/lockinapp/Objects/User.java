@@ -1,4 +1,4 @@
-package com.example.lockinapp;
+package com.example.lockinapp.Objects;
 
 import java.util.ArrayList;
 import java.util.List;

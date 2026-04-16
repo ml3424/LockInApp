@@ -1,4 +1,4 @@
-package com.example.lockinapp;
+package com.example.lockinapp.Fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,6 +12,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import com.example.lockinapp.Services.GeminiCallBack;
+import com.example.lockinapp.Services.GeminiManager;
+import com.example.lockinapp.R;
 
 public class SessionFeedbackFragment extends Fragment {
 

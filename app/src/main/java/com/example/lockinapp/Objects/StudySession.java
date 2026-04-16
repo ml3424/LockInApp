@@ -1,4 +1,4 @@
-package com.example.lockinapp;
+package com.example.lockinapp.Objects;
 
 public class StudySession {
     private String sessionId; // unique id for the session

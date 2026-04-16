@@ -1,6 +1,4 @@
-package com.example.lockinapp;
-
-import static androidx.core.content.ContentProviderCompat.requireContext;
+package com.example.lockinapp.Services;
 
 import android.content.Context;
 import android.graphics.Bitmap;
