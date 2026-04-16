@@ -69,7 +69,7 @@ public class StudyCameraManager {
     /**
      * Configures and binds the CameraX lifecycle to the application.
      * <p>
-     * This method utilizes a {@code Preview} use case to ensure optimal performance.
+     * This method utilizes a {@code Preview}.
      * Maintaining an active Preview stream provides:
      * <p>
      * Low Latency: Keeps the hardware(camera) "warm" to eliminate opening it to every pic.
