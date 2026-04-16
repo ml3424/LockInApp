@@ -29,6 +29,9 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The type Stats fragment.
+ */
 public class StatsFragment extends Fragment {
 
     private BarChart barChart;
@@ -38,8 +41,14 @@ public class StatsFragment extends Fragment {
     private String currentUserId;
     private List<StudySession> allSessions = new ArrayList<>();
     private List<String> dateLabels = new ArrayList<>();
+    /**
+     * The Subjects.
+     */
     String[] subjects = {"General", "Math", "English", "History", "Computer Science", "Physics"};
 
+    /**
+     * Instantiates a new Stats fragment.
+     */
     public StatsFragment() {}
 
     /**

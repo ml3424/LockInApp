@@ -16,6 +16,9 @@ import com.example.lockinapp.R;
 
 import java.util.List;
 
+/**
+ * The type Store adapter.
+ */
 public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.RewardViewHolder> {
 
     private Context context;
@@ -31,6 +34,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.RewardViewHo
     public interface OnItemClickListener {
         /**
          * Triggered when the user clicks the action button on a reward item.
+         *
          * @param reward The specific reward associated with the clicked item.
          */
         void onBuyClick(Reward reward);
@@ -38,9 +42,10 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.RewardViewHo
 
     /**
      * Initializes the adapter with reward data and a click listener.
-     * @param context  The fragment context for layout inflation and SharedPreferences.
+     *
+     * @param context    The fragment context for layout inflation and SharedPreferences.
      * @param rewardList The list of {@link Reward} objects to display in the store.
-     * @param listener Implementation of the click handler for purchase/equip actions.
+     * @param listener   Implementation of the click handler for purchase/equip actions.
      */
     public StoreAdapter(Context context, List<Reward> rewardList, OnItemClickListener listener) {
         this.context = context;
@@ -162,10 +167,27 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.RewardViewHo
      * and reduces battery consumption.
      */
     public static class RewardViewHolder extends RecyclerView.ViewHolder {
-        TextView textViewName, textViewCost;
+        /**
+         * The Text view name.
+         */
+        TextView textViewName, /**
+         * The Text view cost.
+         */
+        textViewCost;
+        /**
+         * The Image view reward.
+         */
         ImageView imageViewReward;
+        /**
+         * The Button buy.
+         */
         Button buttonBuy;
 
+        /**
+         * Instantiates a new Reward view holder.
+         *
+         * @param itemView the item view
+         */
         public RewardViewHolder(@NonNull View itemView) {
             super(itemView);
 

@@ -49,6 +49,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+/**
+ * The type Study fragment.
+ */
 public class StudyFragment extends Fragment implements AdapterView.OnItemSelectedListener{
 
     private SeekBar seekBarTime;
@@ -102,6 +105,9 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         }
     };
 
+    /**
+     * Instantiates a new Study fragment.
+     */
     public StudyFragment() {}
 
     /**

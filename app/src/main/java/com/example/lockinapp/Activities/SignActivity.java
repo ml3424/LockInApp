@@ -25,6 +25,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+/**
+ * The type Sign activity.
+ */
 public class SignActivity extends AppCompatActivity {
 
     private final String logoUrl = "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Rocket/3D/rocket_3d.png";
@@ -199,6 +202,8 @@ public class SignActivity extends AppCompatActivity {
      * Depending on the current toggle state ({@code sign}), it triggers
      * either the login or the registration flow.
      * * @param view The view that was clicked.
+     *
+     * @param view the view
      */
     public void onEnter(View view) {
         if(sign == 0) // sign in = 0
@@ -217,6 +222,8 @@ public class SignActivity extends AppCompatActivity {
      * Updates the {@code sign} flag and modifies the text of relevant
      * TextViews to reflect the current mode to the user.
      * * @param view The view that was clicked.
+     *
+     * @param view the view
      */
     public void on_change_sign(View view) {
         if(sign == 0) // sign in = 0

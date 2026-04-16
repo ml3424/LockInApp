@@ -17,6 +17,9 @@ import com.example.lockinapp.Services.GeminiCallBack;
 import com.example.lockinapp.Services.GeminiManager;
 import com.example.lockinapp.R;
 
+/**
+ * The type Session feedback fragment.
+ */
 public class SessionFeedbackFragment extends Fragment {
 
     private EditText eTFeedbackInput;
@@ -27,6 +30,9 @@ public class SessionFeedbackFragment extends Fragment {
     private int sessionScore;
     private long sessionDurationMin;
 
+    /**
+     * Instantiates a new Session feedback fragment.
+     */
     public SessionFeedbackFragment() {}
 
     /**

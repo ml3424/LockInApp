@@ -23,6 +23,9 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+/**
+ * The type Timer service.
+ */
 public class TimerService extends Service implements SensorEventListener {
 
     private static final String CHANNEL_ID = "timer_service_channel";

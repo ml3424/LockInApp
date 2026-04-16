@@ -34,6 +34,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * The type Store fragment.
+ */
 public class StoreFragment extends Fragment {
     private RecyclerView recyclerVStore;
     private TextView tVUserPoints;

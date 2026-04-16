@@ -21,6 +21,9 @@ import kotlin.coroutines.Continuation;
 import kotlin.coroutines.CoroutineContext;
 import kotlin.coroutines.EmptyCoroutineContext;
 
+/**
+ * The type Gemini manager.
+ */
 public class GeminiManager {
     private static GeminiManager instance;
     private GenerativeModel gemini;
@@ -40,6 +43,7 @@ public class GeminiManager {
 
     /**
      * Provides access to the single instance of the GeminiManager.
+     *
      * @return The active {@code GeminiManager} instance.
      */
     public static GeminiManager getInstance() {
@@ -56,7 +60,7 @@ public class GeminiManager {
      * This method handles the context required by the
      * Google AI SDK and translates the result into a simplified {@link GeminiCallBack}.
      *
-     * @param prompt The instructions or data to be processed by the AI.
+     * @param prompt   The instructions or data to be processed by the AI.
      * @param callback Interface to handle the success or failure of the generation.
      */
     public void sendTextPrompt(String prompt, GeminiCallBack callback) {

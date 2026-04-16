@@ -1,5 +1,8 @@
 package com.example.lockinapp.Services;
 
+/**
+ * The interface Gemini call back.
+ */
 public interface GeminiCallBack {
     /**
      * Called when the Gemini AI model successfully returns a text response.

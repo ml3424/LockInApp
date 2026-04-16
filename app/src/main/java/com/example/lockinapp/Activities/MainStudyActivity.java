@@ -14,6 +14,9 @@ import com.example.lockinapp.Fragments.StudyFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 
+/**
+ * The type Main study activity.
+ */
 public class MainStudyActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNavigation;

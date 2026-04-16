@@ -30,6 +30,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * The type Study camera manager.
+ */
 public class StudyCameraManager {
 
     private final Context context;
@@ -52,9 +55,9 @@ public class StudyCameraManager {
      * Sets up the context, lifecycle binding, and preview surface, while
      * initializing data structures for focus scoring and random capture scheduling.
      *
-     * @param context The activity context.
+     * @param context        The activity context.
      * @param lifecycleOwner The lifecycle owner (Fragment) to bind camera sessions.
-     * @param previewView The UI component used to host the camera's surface provider.
+     * @param previewView    The UI component used to host the camera's surface provider.
      */
     public StudyCameraManager(Context context, LifecycleOwner lifecycleOwner, PreviewView previewView) {
         this.context = context;
