@@ -60,6 +60,13 @@ public class SessionFeedbackFragment extends Fragment {
         if (getArguments() != null) {
             sessionScore = getArguments().getInt("SCORE", 0);
             sessionDurationMin = getArguments().getInt("DURATION_MIN", 0);
+
+            if (sessionScore == -1) {
+                tvFeedbackScore.setText("--");
+            }
+            else {
+                tvFeedbackScore.setText(String.valueOf(sessionScore));
+            }
         }
         setupBtns();
         return view;
@@ -115,11 +122,18 @@ public class SessionFeedbackFragment extends Fragment {
             return;
         }
 
-        String prompt = "The user finished a study session, be sure to knowledge the user's feeling. " +
+        String aiScoreText;
+        if (sessionScore == -1) {
+            aiScoreText = "Note: No AI concentration data is available for this session (error). Focus only on duration and user feelings. ";
+        } else {
+            aiScoreText = "AI Concentration Score: " + sessionScore + "/100. ";
+        }
+
+        String prompt = "The user finished a study session, be sure to acknowledge the user's feeling. " +
                 "Duration: " + sessionDurationMin + " minutes. " +
-                "AI Concentration Score: " + sessionScore + "/100. " +
+                aiScoreText +
                 "User's feeling: '" + userFeedback + "'. " +
-                "Provide a short, warm, motivating feedback and one tip for the next session in Hebrew. no more then 4 sentences.";
+                "Provide a short, warm, motivating feedback and one tip for the next session in Hebrew. no more than 4 sentences.";
 
         tvAiFeedback.setText("Thinking...");
         btnSendFeedback.setEnabled(false);
@@ -127,7 +141,7 @@ public class SessionFeedbackFragment extends Fragment {
         geminiManager.sendTextPrompt(prompt, new GeminiCallBack() {
             @Override
             public void onSuccess(final String result) {
-                if (getActivity() == null) return;
+                if (!isAdded() || getActivity() == null) return;
 
                 requireActivity().runOnUiThread(new Runnable() {
                     @Override
