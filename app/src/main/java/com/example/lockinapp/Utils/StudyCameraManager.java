@@ -1,4 +1,4 @@
-package com.example.lockinapp.Services;
+package com.example.lockinapp.Utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -20,6 +20,8 @@ import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
+import com.example.lockinapp.Services.GeminiCallBack;
+import com.example.lockinapp.Services.GeminiManager;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.nio.ByteBuffer;
@@ -67,6 +69,18 @@ public class StudyCameraManager {
         this.concentrationScores = new ArrayList<>();
         this.randomCaptureHandler = new Handler(Looper.getMainLooper());
         this.random = new Random();
+    }
+
+    /**
+     * Safely stops operations and releases the camera hardware.
+     * Called ONLY when the screen is being destroyed.
+     */
+    public void destroy() {
+        stopRandomCaptures();
+
+        if (cameraProvider != null) {
+            cameraProvider.unbindAll();
+        }
     }
 
     /**
@@ -190,7 +204,8 @@ public class StudyCameraManager {
      * @return The average concentration score as an integer (0-100).
      */
     public int getAverageScore() {
-        if (concentrationScores.isEmpty()) return 0;
+        if (concentrationScores.isEmpty()) return -1;
+
         int sum = 0;
         for (int score : concentrationScores) {
             sum += score;

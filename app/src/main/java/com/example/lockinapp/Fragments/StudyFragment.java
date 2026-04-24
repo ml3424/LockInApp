@@ -13,7 +13,6 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,10 +35,9 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.bumptech.glide.Glide;
 import com.example.lockinapp.Activities.SignActivity;
 import com.example.lockinapp.R;
-import com.example.lockinapp.Services.StudyCameraManager;
+import com.example.lockinapp.Utils.StudyCameraManager;
 import com.example.lockinapp.Objects.StudySession;
-import com.example.lockinapp.Broadcasts.TimerService;
-import com.google.android.gms.tasks.OnFailureListener;
+import com.example.lockinapp.Services.TimerService;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -175,6 +173,15 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         });
 
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (cameraManager != null) {
+            cameraManager.destroy();
+            cameraManager = null;
+        }
     }
 
     /**
@@ -443,7 +450,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
 
         // Apply AI focus multiplier
         if (aiScore > 80) pointsEarned *= 1.2;
-        else if (aiScore < 50 && aiScore > 0) pointsEarned *= 0.9;
+        else if (aiScore < 50 && aiScore > 0 && aiScore != -1) pointsEarned *= 0.9;
 
         // Apply Shop Booster
         if (requireContext()
