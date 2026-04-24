@@ -167,20 +167,9 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.RewardViewHo
      * and reduces battery consumption.
      */
     public static class RewardViewHolder extends RecyclerView.ViewHolder {
-        /**
-         * The Text view name.
-         */
-        TextView textViewName, /**
-         * The Text view cost.
-         */
-        textViewCost;
-        /**
-         * The Image view reward.
-         */
+
+        TextView textViewName, textViewCost;
         ImageView imageViewReward;
-        /**
-         * The Button buy.
-         */
         Button buttonBuy;
 
         /**

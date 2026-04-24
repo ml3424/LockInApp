@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
-import com.example.lockinapp.R;
 import com.example.lockinapp.Fragments.StatsFragment;
 import com.example.lockinapp.Fragments.StoreFragment;
 import com.example.lockinapp.Fragments.StudyFragment;

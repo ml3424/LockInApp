@@ -95,7 +95,7 @@ public class TimerService extends Service implements SensorEventListener {
      * <p>
      * This ensures that the accelerometer listener is unregistered to save battery,
      * unregisters the broadcast receiver
-     * and that any active {@code CountDownTimer} is cancelled to prevent
+     * and that any active {@code CountDownTimer} is canceled to prevent
      * memory leaks or background crashes.
      */
     @Override

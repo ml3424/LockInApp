@@ -140,7 +140,17 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         mainLayout = view.findViewById(R.id.main);
         bottomNav = requireActivity().findViewById(R.id.bottom_navigation);
 
-        currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        }
+        else
+        {
+            Toast.makeText(requireContext(), "Session expired, please log in again", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(requireContext(), SignActivity.class);
+            startActivity(intent);
+            requireActivity().finish();
+            return view;
+        }
 
         cameraManager = new StudyCameraManager(requireContext(), getViewLifecycleOwner(), cameraPreview);
 
@@ -200,7 +210,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
                 btnToggleTimer.setText("Stop Timer");
                 seekBarTime.setEnabled(false);
                 btnLogOut.setEnabled(false);
-                bottomNav.setVisibility(View.GONE);
+                if (bottomNav != null) bottomNav.setVisibility(View.GONE);
                 mainLayout.setKeepScreenOn(true);
             }
         }
@@ -353,6 +363,12 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
      * the selected duration, and starts camera manager to begin focus tracking.
      */
     private void startTimer() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(requireContext(), "Cannot start without camera permission!", Toast.LENGTH_SHORT).show();
+            checkCameraPermissions();
+            return;
+        }
+
         if (selectedMinutes > 0)
         {
             mainLayout.setKeepScreenOn(true);
@@ -367,7 +383,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
                     .apply();
 
             btnLogOut.setEnabled(false);
-            bottomNav.setVisibility(View.GONE);
+            if (bottomNav != null) bottomNav.setVisibility(View.GONE);
 
             Intent serviceIntent = new Intent(requireContext(), TimerService.class);
             serviceIntent.putExtra("DURATION_MIN", selectedMinutes);
@@ -475,22 +491,13 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         );
 
         if (sessionId != null) {
-            sessionsRef.child(sessionId).setValue(session)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            updateUserGlobalPoints(userRef, points, durationSeconds);
+            sessionsRef.child(sessionId).setValue(session);
+            updateUserGlobalPoints(userRef, points, durationSeconds);
 
-                            Toast.makeText(requireContext(), "Session saved! You earned " + points + " points", Toast.LENGTH_LONG).show();
-                            navigateToFeedback(aiScore, selectedMinutes);
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.e("firebase", "failed to save session", e);
-                        }
-                    });
+            if (isAdded() && getContext() != null) {
+                Toast.makeText(requireContext(), "Session saved! You earned " + points + " points", Toast.LENGTH_LONG).show();
+                navigateToFeedback(aiScore, selectedMinutes);
+            }
         }
     }
 
@@ -632,7 +639,7 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
 
         seekBarTime.setEnabled(true); // unlock seekbar
         tvSelectedTime.setText("set time with the bar");
-        bottomNav.setVisibility(View.VISIBLE);
+        if (bottomNav != null) bottomNav.setVisibility(View.VISIBLE);
     }
 
     /**

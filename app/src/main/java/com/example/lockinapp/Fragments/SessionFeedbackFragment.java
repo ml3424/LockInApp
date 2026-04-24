@@ -13,9 +13,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.lockinapp.R;
 import com.example.lockinapp.Services.GeminiCallBack;
 import com.example.lockinapp.Services.GeminiManager;
-import com.example.lockinapp.R;
 
 /**
  * The type Session feedback fragment.
