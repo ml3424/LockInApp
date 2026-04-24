@@ -41,16 +41,17 @@ public class StoreFragment extends Fragment {
     private RecyclerView recyclerVStore;
     private TextView tVUserPoints;
 
+    private ValueEventListener pointsListener, purchasesListener, catalogListener;
     private StoreAdapter storeAdapter;
     private List<Reward> rewardList  = new ArrayList<>();
 
-    private String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+    private String currentUserId;
     private int currentUserPoints = 0;
 
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference rewardsRef = database.getReference("Rewards");
-    private DatabaseReference usersRef = database.getReference("Users").child(currentUserId);
-    private DatabaseReference userRewardsRef = database.getReference("UserRewards").child(currentUserId);
+    private DatabaseReference usersRef;
+    private DatabaseReference userRewardsRef;
 
     /**
      * Initializes the store UI and handles item interaction logic.
@@ -69,6 +70,15 @@ public class StoreFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.store_fragment, container, false);
 
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            usersRef = database.getReference("Users").child(currentUserId);
+            userRewardsRef = database.getReference("UserRewards").child(currentUserId);
+        }
+        else {
+            Toast.makeText(getContext(), "User disconnected", Toast.LENGTH_SHORT).show();
+            return view;
+        }
         recyclerVStore = view.findViewById(R.id.recyclerVStore);
         tVUserPoints = view.findViewById(R.id.tVUserPoints);
 
@@ -98,6 +108,20 @@ public class StoreFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (usersRef != null && pointsListener != null) {
+            usersRef.child("currentPoints").removeEventListener(pointsListener);
+        }
+        if (userRewardsRef != null && purchasesListener != null) {
+            userRewardsRef.removeEventListener(purchasesListener);
+        }
+        if (rewardsRef != null && catalogListener != null) {
+            rewardsRef.removeEventListener(catalogListener);
+        }
+    }
+
     /**
      * Synchronizes the user's total points with the Firebase.
      * <p>
@@ -107,7 +131,7 @@ public class StoreFragment extends Fragment {
      * in the {@code tVUserPoints} display.
      */
     private void loadUserPoints() {
-        usersRef.child("currentPoints").addValueEventListener(new ValueEventListener() {
+        pointsListener = usersRef.child("currentPoints").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (!isAdded() || getContext() == null) return;
@@ -141,7 +165,7 @@ public class StoreFragment extends Fragment {
      * "Buy" to "Equip" or "Equipped".
      */
     private void loadPurchases() {
-        userRewardsRef.addValueEventListener(new ValueEventListener() {
+        purchasesListener = userRewardsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (!isAdded() || getContext() == null) return;
@@ -185,7 +209,7 @@ public class StoreFragment extends Fragment {
      * images are managed and cached by the Glide library in the adapter.
      */
     private void fetchStoreCatalog() {
-        rewardsRef.addValueEventListener(new ValueEventListener() {
+        catalogListener = rewardsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (!isAdded() || getContext() == null) return;
