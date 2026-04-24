@@ -60,8 +60,6 @@ public class SessionFeedbackFragment extends Fragment {
         if (getArguments() != null) {
             sessionScore = getArguments().getInt("SCORE", 0);
             sessionDurationMin = getArguments().getInt("DURATION_MIN", 0);
-
-            tvFeedbackScore.setText(String.valueOf(85));
         }
         setupBtns();
         return view;

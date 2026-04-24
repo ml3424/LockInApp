@@ -8,12 +8,14 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.lockinapp.Objects.StudySession;
+import com.example.lockinapp.R;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
@@ -36,6 +38,9 @@ public class StatsFragment extends Fragment {
     private BarChart barChart;
     private Spinner spinnerStatsSubject;
     private TextView tvDetailedStats;
+
+    private ValueEventListener statsListener;
+    private com.google.firebase.database.Query statsQuery;
 
     private String currentUserId;
     private List<StudySession> allSessions = new ArrayList<>();
@@ -69,7 +74,13 @@ public class StatsFragment extends Fragment {
         spinnerStatsSubject = view.findViewById(R.id.spinnerStatsSubject);
         tvDetailedStats = view.findViewById(R.id.tvDetailedStats);
 
-        currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        }
+        else {
+            Toast.makeText(getContext(), "Please log in to view stats", Toast.LENGTH_SHORT).show();
+            return view;
+        }
 
         setupSpinner();
         loadDataFromFirebase();
@@ -109,11 +120,13 @@ public class StatsFragment extends Fragment {
      */
     private void loadDataFromFirebase() {
         DatabaseReference sessionsRef = FirebaseDatabase.getInstance().getReference("StudySessions");
+        statsQuery = sessionsRef.orderByChild("userId").equalTo(currentUserId);
 
         // fetch sessions belonging to this user
-        sessionsRef.orderByChild("userId").equalTo(currentUserId).addValueEventListener(new ValueEventListener() {
+        statsListener = sessionsRef.orderByChild("userId").equalTo(currentUserId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!isAdded() || getContext() == null) return;
                 allSessions.clear();
                 for (DataSnapshot data : snapshot.getChildren()) {
                     StudySession session = data.getValue(StudySession.class);

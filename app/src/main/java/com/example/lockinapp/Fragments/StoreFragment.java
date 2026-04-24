@@ -209,7 +209,7 @@ public class StoreFragment extends Fragment {
      * images are managed and cached by the Glide library in the adapter.
      */
     private void fetchStoreCatalog() {
-        catalogListener = rewardsRef.addValueEventListener(new ValueEventListener() {
+        rewardsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (!isAdded() || getContext() == null) return;
