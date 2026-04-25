@@ -1,4 +1,4 @@
-package com.example.lockinapp.Services;
+package com.example.lockinapp.Utils;
 
 import android.graphics.Bitmap;
 import android.util.Log;
@@ -79,7 +79,10 @@ public class GeminiManager {
                             callback.onFailure(((Result.Failure) result).exception);
                         }
                         else {
-                            callback.onSuccess(((GenerateContentResponse) result).getText());
+                            String generatedText = ((GenerateContentResponse) result).getText();
+                            if (generatedText != null && !generatedText.trim().isEmpty()) {
+                                callback.onSuccess(generatedText);
+                            }
                         }
                     }
                 });
@@ -120,7 +123,10 @@ public class GeminiManager {
                             callback.onFailure(((Result.Failure) result).exception);
                         }
                         else {
-                            callback.onSuccess(((GenerateContentResponse) result).getText());
+                            String generatedText = ((GenerateContentResponse) result).getText();
+                            if (generatedText != null && !generatedText.trim().isEmpty()) {
+                                callback.onSuccess(generatedText);
+                            }
                         }
                     }
                 });

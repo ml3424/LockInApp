@@ -20,8 +20,6 @@ import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
-import com.example.lockinapp.Services.GeminiCallBack;
-import com.example.lockinapp.Services.GeminiManager;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.nio.ByteBuffer;

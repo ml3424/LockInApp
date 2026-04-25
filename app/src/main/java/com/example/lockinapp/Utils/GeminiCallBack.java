@@ -1,4 +1,4 @@
-package com.example.lockinapp.Services;
+package com.example.lockinapp.Utils;
 
 /**
  * The interface Gemini call back.
