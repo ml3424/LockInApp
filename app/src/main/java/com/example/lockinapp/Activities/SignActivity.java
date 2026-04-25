@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.example.lockinapp.Objects.User;
+import com.example.lockinapp.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -87,7 +88,7 @@ public class SignActivity extends AppCompatActivity {
      * saves login preferences, and stores a new {@code User} object in the Realtime Database
      * before navigating to the main activity.
      */
-    private void registerUser() {
+    private void registerUser(View view) {
         String email = eTEmail.getText().toString().trim();
         String password = eTPassword.getText().toString().trim();
 
@@ -108,7 +109,7 @@ public class SignActivity extends AppCompatActivity {
                             User newUser = new User(userId, email.split("@")[0]); // the name is the first part of the email
 
                             mDatabase.child("Users").child(userId).setValue(newUser)
-                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    .addOnCompleteListener(SignActivity.this, new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> dbTask) {
                                             if (dbTask.isSuccessful()) {
@@ -131,6 +132,7 @@ public class SignActivity extends AppCompatActivity {
 
                             Log.e("Registration", "Registration Failed: " + errorMessage);
                             Toast.makeText(SignActivity.this, "Error occurred - " + errorMessage , Toast.LENGTH_LONG).show();
+                            view.setEnabled(true);
                         }
                     }
                 });
@@ -143,7 +145,7 @@ public class SignActivity extends AppCompatActivity {
      * validation check, and attempts to sign in. Upon success, it updates login
      * preferences and navigates the user to the main activity.D
      */
-    private void signinUser() {
+    private void signinUser(View view) {
         String email = eTEmail.getText().toString().trim();
         String password = eTPassword.getText().toString().trim();
 
@@ -166,6 +168,7 @@ public class SignActivity extends AppCompatActivity {
                         }
                         else {
                             Toast.makeText(SignActivity.this, "Login failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                            view.setEnabled(true);
                         }
                     }
                 });
@@ -205,13 +208,14 @@ public class SignActivity extends AppCompatActivity {
      * @param view the view
      */
     public void onEnter(View view) {
+        view.setEnabled(false);
         if(sign == 0) // sign in = 0
         {
-            signinUser();
+            signinUser(view);
         }
         else // sign up = 1
         {
-            registerUser();
+            registerUser(view);
         }
     }
 
