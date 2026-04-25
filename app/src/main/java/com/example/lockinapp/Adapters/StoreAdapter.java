@@ -118,17 +118,18 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.RewardViewHo
     private void updateButtonState(RewardViewHolder holder, String rewardId) {
         SharedPreferences sharedPref = context.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         boolean isOwned = sharedPref.getBoolean("owned_" + rewardId, false);
+
+        String activeThemeId = sharedPref.getString("active_theme_id", "");
+        String activeFontId = sharedPref.getString("active_font_id", "");
+
         boolean isActive = false;
 
-        String activeTheme = sharedPref.getString("active_theme", "");
-        String activeFont = sharedPref.getString("active_font", "");
-
-        if (rewardId.equals("r1") && activeTheme.equals("pink")) isActive = true;
-        else if (rewardId.equals("r2") && activeTheme.equals("dark")) isActive = true;
-        else if (rewardId.equals("r4") && activeTheme.equals("nature")) isActive = true;
-        else if (rewardId.equals("r5") && activeFont.equals("retro")) isActive = true;
-        else if (rewardId.equals("r7") && activeFont.equals("classic")) isActive = true;
-        else if ((rewardId.equals("r3") || rewardId.equals("r6")) && isOwned) isActive = true;
+        if (rewardId.equals(activeThemeId) || rewardId.equals(activeFontId)) {
+            isActive = true;
+        }
+        else if ((rewardId.equals("r3") || rewardId.equals("r6")) && isOwned) {
+            isActive = true;
+        }
 
         if (isActive) {
             holder.buttonBuy.setEnabled(false);

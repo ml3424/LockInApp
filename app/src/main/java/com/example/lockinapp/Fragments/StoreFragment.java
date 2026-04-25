@@ -290,24 +290,37 @@ public class StoreFragment extends Fragment {
      *
      * @param reward The selected reward to be applied.
      */
-    private void equipReward(Reward reward)
-    {
+    private void equipReward(Reward reward) {
         String rewardId = reward.getRewardId();
         SharedPreferences sharedPref = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
 
         // themes
-        if (rewardId.equals("r1")) editor.putString("active_theme", "pink");
-        else if (rewardId.equals("r2")) editor.putString("active_theme", "dark");
-        else if (rewardId.equals("r4")) editor.putString("active_theme", "nature");
+        if (rewardId.equals("r1")){
+            editor.putString("active_theme", "pink");
+            editor.putString("active_theme_id", rewardId);
+        }
+        else if (rewardId.equals("r2")){
+            editor.putString("active_theme", "dark");
+            editor.putString("active_theme_id", rewardId);
+        }
+        else if (rewardId.equals("r4")){
+            editor.putString("active_theme", "nature");
+            editor.putString("active_theme_id", rewardId);
+        }
 
         // fonts
-        else if (rewardId.equals("r5")) editor.putString("active_font", "retro");
-        else if (rewardId.equals("r7")) editor.putString("active_font", "classic");
+        else if (rewardId.equals("r5")) {
+            editor.putString("active_font", "retro");
+            editor.putString("active_font_id", rewardId);
+        }
+        else if (rewardId.equals("r7")) {
+            editor.putString("active_font", "classic");
+            editor.putString("active_font_id", rewardId);
+        }
 
-        // boosters
         else if (rewardId.equals("r3")) editor.putBoolean("has_point_booster", true);
-        //else if (rewardId.equals("r6")) editor.putBoolean("has_golden_badge", true);
+        else if (rewardId.equals("r6")) editor.putBoolean("has_golden_badge", true);
 
         editor.apply();
 
