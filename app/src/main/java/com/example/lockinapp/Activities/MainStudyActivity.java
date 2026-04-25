@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment;
 import com.example.lockinapp.Fragments.StatsFragment;
 import com.example.lockinapp.Fragments.StoreFragment;
 import com.example.lockinapp.Fragments.StudyFragment;
+import com.example.lockinapp.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 
