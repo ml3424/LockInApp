@@ -169,7 +169,8 @@ public class TimerService extends Service implements SensorEventListener {
                         try {
                             cameraManager.setTorchMode(cameraId, false);
                             isDistracted = false;
-                        } catch (Exception e) {
+                        }
+                        catch (Exception e) {
                             Log.e("TimerService", "Flashlight error: Could not turn off torch", e);
                         }
                     }
@@ -208,7 +209,12 @@ public class TimerService extends Service implements SensorEventListener {
         createNotiChannel();
 
         Notification notification = buildNotification("Your study session is starting...");
-        startForeground(1, notification);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // Android 14+
+            startForeground(1, notification, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+        }
+        else {
+            startForeground(1, notification);
+        }
 
         countDownTimer = new CountDownTimer(millis, 1000) {
             @Override
