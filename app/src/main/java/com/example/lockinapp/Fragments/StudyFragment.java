@@ -175,6 +175,10 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
         return view;
     }
 
+    /**
+     * Cleans up view-related resources and shuts down the camera manager
+     * to prevent memory leaks and hardware locks.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -185,18 +189,9 @@ public class StudyFragment extends Fragment implements AdapterView.OnItemSelecte
     }
 
     /**
-     * Resynchronizes the UI and background services when the Fragment returns to the foreground.
-     * <p>
-     * This method performs a critical "catch-up" check:
-     * <ul>
-     * <li><b>Time Sync:</b> Compares the current system time with the saved {@code expectedEndTime}.
-     * If the time has already passed, it cleans up the session immediately.</li>
-     * <li><b>UI Restoration:</b> If the timer is still active, it locks the UI (buttons and seekbar)
-     * to prevent inconsistent state changes.</li>
-     * <li><b>Broadcast Setup:</b> Re-registers the {@code LocalBroadcastManager} to start
-     * receiving live "Tick" updates and "Finished" signals from the background Service.</li>
-     * <li><b>Sensor Resume:</b> Restarts the camera monitoring.</li>
-     * </ul>
+     * Syncs the UI with background services on resume.
+     * Checks for active timer sessions, restores UI state, re-registers
+     * broadcast receivers(for the tick and finished signals), and resumes camera monitoring if necessary.
      */
     @Override
     public void onResume() {

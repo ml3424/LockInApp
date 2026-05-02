@@ -108,6 +108,11 @@ public class StoreFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Detaches database listeners and releases hardware resources.
+     * Ensures proper cleanup of Firebase observers and camera services
+     * to prevent memory leaks when the view is destroyed.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();
